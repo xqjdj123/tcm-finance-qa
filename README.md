@@ -44,20 +44,6 @@
 ### ✅ 完整可用
 | 模块 | 说明 |
 |------|------|
-| `pdf_extractor/` 14个模块 | 上交所+深交所财报PDF→结构化JSON，含字段映射+LLM回退 |
-| `rag_module.py` 21KB | FAISS+BM25双路检索+RRF融合+Reranker |
-| `agent/agent.py` | ReAct风格Agent，7类TaskType + 多步工具调用 |
-| `agent/tools/sql_tool.py` | MySQL查询，支持趋势/对比/自动模式 |
-| `agent/tools/risk_tool.py` | 6条财务风险规则（负债率/现金流/应收账款等） |
-| `agent/tools/report_tool.py` | 六段式财务分析报告生成 |
-| `agent/tools/data_tool.py` | 二次计算+排名+筛选+统计 |
-| `agent/tools/chart_tool.py` | 智能选图(line/bar/hbar/pie) |
-| `agent/tools/rag_tool.py` | RAG研报搜索 |
-| `app.py` + 前端 | Flask Web 服务 + ECharts 图表 |
-
-### ⚠️ 骨架就绪，模型权重需本地训练
-| 模块 | 说明 |
-|------|------|
 | `models/model2/pipeline.py` | NER+Model2+NL2SQL 查询管线，checkpoint权重未上传 |
 | `models/ner_model/` | BertForTokenClassification，路径不存在时会跳过 |
 | `models/model1_schema_linking/` | Schema链接（字段→表映射），权重未上传 |
@@ -114,12 +100,11 @@ python app.py
 
 | 提交 | 内容 |
 |------|------|
-| `📝 Day 1` | 项目初始化：Agent框架、PDF提取、RAG管线、模型骨架 |
+| 📝 Day 1 | 项目初始状态：Agent框架、PDF提取管线、RAG检索、模型骨架。如实记录各模块完成度(完整可用/骨架就绪/有隐患) |
+| 📝 Day 2 | 对话连续性升级：新增 FollowupResolver 追问解析器独立类，session 精简为4个getter，agent追问逻辑集中管理 |
 
-*每次开发完执行 `git commit -m "📝 Day X: ..."` 继续记录*
+*每次开发完执行 \git add .\ + \git commit -m "📝 Day X: ..."\ + \git push\ 继续记录*
 
 ---
-
-## 📄 许可证
 
 MIT License
