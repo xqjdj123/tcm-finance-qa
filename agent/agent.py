@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from agent.config import MAX_STEPS
 from agent.llm import LLMClient
 from agent.session import get_session_manager
+from agent.followup_resolver import FollowupResolver, FollowupType
 from agent.tools.sql_tool import SQLTool
 from agent.tools.rag_tool import RAGTool
 from agent.tools.data_tool import DataTool
@@ -97,6 +98,7 @@ class FinanceAgent:
     def __init__(self):
         self.llm = LLMClient()
         self.session_mgr = get_session_manager()
+        self.followup_resolver = FollowupResolver()
         self.tools = {
             "sql_query": SQLTool(),
             "rag_search": RAGTool(),
@@ -132,7 +134,7 @@ class FinanceAgent:
             return TaskType.CHART
         return TaskType.QUERY
 
-    def _check_slots(self, question, task_type):
+    def _check_slots(self, question, task_type, session=None):
         """轻量级槽位检查：只在明确缺信息时才提示，不拦截排名/统计类查询"""
         has_indicator = any(kw in question for kw in [
             "净利润", "营收", "收入", "利润", "资产", "负债",
@@ -143,34 +145,35 @@ class FinanceAgent:
 
         # 只有QUERY类型且完全没有指标关键词时才提示
         if task_type == TaskType.QUERY and not has_indicator:
-            has_company = bool(re.search(
+            # 检查问题中或 session 中是否有公司名
+            has_company_in_question = bool(re.search(
                 r"白云山|云南白药|华润三九|同仁堂|片仔癀|金花|999|白药|三金|同仁",
                 question
             ))
-            if has_company:
+            has_company_in_session = session and session.slots.get("company")
+            if has_company_in_question and not has_company_in_session:
                 return "请提供要查询的指标，例如'净利润'、'营收'"
 
         return None
 
     def _handle_followup(self, question, session, session_id):
-        """追问检测：在分类和槽位检查之前执行，判断是否是上一轮的追问"""
-        last = session.history[-1]
-        last_data = last.get("data")
-        last_slots = last.get("slots", {})
-        last_question = last.get("question", "")
+        """追问检测：使用 FollowupResolver 统一处理"""
+        # 使用 FollowupResolver 解析追问
+        resolved = self.followup_resolver.resolve(question, session)
 
-        # 追问关键词检测
-        chart_kws = ["图片", "画图", "图表", "柱状图", "折线图", "饼图", "可视化", "画一下", "画个图"]
-        report_kws = ["报告", "报告书", "生成报告", "导出报告"]
-        rank_kws = ["第二名", "第三名", "第四名", "第五名", "前三", "前五", "前十",
-                    "第一", "第二", "第三", "第四", "第五", "最后一名", "排名"]
+        if not resolved["is_followup"]:
+            return None
 
-        # 1. 图表追问：用上一轮数据直接生成图表
-        if any(kw in question for kw in chart_kws):
+        followup_type = resolved["type"]
+        slots = resolved["slots"]
+        last_data = session.get_last_data()
+
+        # 1. 图表追问
+        if followup_type == FollowupType.CHART:
             if last_data and isinstance(last_data, list) and len(last_data) >= 2:
-                indicator = last_slots.get("indicator", "")
-                # 检测用户是否指定了图表类型
-                chart_type = self._detect_chart_type_from_text(question)
+                indicator = slots.get("indicator", "")
+                indicator = self._metric_to_cn(indicator)
+                chart_type = resolved.get("chart_type")
                 chart_html = self._generate_chart(last_data, indicator, chart_type=chart_type)
                 return {
                     "answer": "根据上一轮查询结果生成图表：",
@@ -183,11 +186,11 @@ class FinanceAgent:
                     "chart": chart_html,
                 }
 
-        # 2. 报告追问：用上一轮的公司信息生成报告
-        if any(kw in question for kw in report_kws):
-            company = last_slots.get("company", "")
+        # 2. 报告追问
+        if followup_type == FollowupType.REPORT:
+            company = slots.get("company", "")
             if company:
-                year = last_slots.get("year", self._extract_year(last_question))
+                year = slots.get("year")
                 plan = ["report"]
                 history, _ = self._execute_plan(plan, question, session, TaskType.REPORT,
                                                override_inputs={"company": company, "year": year})
@@ -203,9 +206,9 @@ class FinanceAgent:
                     "confidence": 0.85,
                 }
 
-        # 3. 排名追问：从上一轮数据中提取第N名
-        if any(kw in question for kw in rank_kws) and last_data:
-            rank_num = self._extract_rank_number(question)
+        # 3. 排名追问
+        if followup_type == FollowupType.RANK and last_data:
+            rank_num = resolved.get("rank_num")
             if rank_num and rank_num <= len(last_data):
                 target = last_data[rank_num - 1]
                 name = target.get("stock_abbr", "")
@@ -222,23 +225,15 @@ class FinanceAgent:
                     "confidence": 0.95,
                 }
 
-        return None
+        # 4. 指标追问（如"那营收呢"）或分析追问（如"为什么增长"）
+        if followup_type in (FollowupType.INDICATOR, FollowupType.ANALYSIS):
+            # 检查是否有足够的槽位
+            if slots.get("company") or slots.get("indicator"):
+                # 更新 session 槽位
+                session.update_slots(slots)
+                # 不拦截，让正常流程处理（会使用更新后的槽位）
+                return None
 
-    def _extract_rank_number(self, question):
-        """从问题中提取排名数字"""
-        import re
-        CN_NUM = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5,
-                  "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
-        # "第二名" → 2
-        m = re.search(r"第([一二三四五六七八九十\d]+)", question)
-        if m:
-            token = m.group(1)
-            return int(token) if token.isdigit() else CN_NUM.get(token)
-        # "前三" → 3, "前五" → 5
-        m = re.search(r"前([一二三四五六七八九十\d]+)", question)
-        if m:
-            token = m.group(1)
-            return int(token) if token.isdigit() else CN_NUM.get(token)
         return None
 
     def _detect_chart_type_from_text(self, question):
@@ -277,7 +272,7 @@ class FinanceAgent:
                 continue
 
             if tool_name == "sql_query":
-                inputs = self._build_sql_inputs(question, task_type)
+                inputs = self._build_sql_inputs(question, task_type, session)
             elif tool_name == "rag_search":
                 inputs = {"query": question, "company": ""}
                 if sql_data:
@@ -331,12 +326,24 @@ class FinanceAgent:
 
         return history, sql_data
 
-    def _build_sql_inputs(self, question, task_type):
-        """根据任务类型构造sql_query的输入"""
+    def _build_sql_inputs(self, question, task_type, session=None):
+        """根据任务类型构造sql_query的输入，自动使用 session 中的槽位"""
+        # 从问题中提取槽位
+        company = self._extract_company(question)
+        metric = self._extract_metric(question)
+
+        # 如果问题中没有公司名，从 session 中获取
+        if not company and session:
+            company = session.slots.get("company", "")
+
         if task_type == TaskType.TREND:
-            company = self._extract_company(question)
-            metric = self._extract_metric(question)
             year_start, year_end = self._extract_year_range(question)
+            # 如果问题中没有年份，从 session 中获取
+            if year_start == year_end and session:
+                session_year = session.slots.get("year")
+                if session_year:
+                    year_start = session_year - 2
+                    year_end = session_year
             return {
                 "question": question,
                 "query_type": "trend",
@@ -347,8 +354,17 @@ class FinanceAgent:
             }
         elif task_type == TaskType.COMPARE:
             companies = self._extract_companies(question)
-            metric = self._extract_metric(question)
+            # 如果问题中没有公司名，从 session 中获取
+            if not companies and session:
+                session_company = session.slots.get("company")
+                if session_company:
+                    companies = [session_company]
             year = self._extract_year(question)
+            # 如果问题中没有年份，从 session 中获取
+            if year == 2024 and session:  # 2024 是默认值
+                session_year = session.slots.get("year")
+                if session_year:
+                    year = session_year
             return {
                 "question": question,
                 "query_type": "compare",
@@ -376,26 +392,46 @@ class FinanceAgent:
                  "东阿阿胶", "江中药业", "健民集团", "千金药业", "羚锐制药"]
         return [n for n in names if n in question]
 
+    # 字段名映射：中文 → 英文
+    METRIC_CN_TO_EN = {
+        "净利润": "net_profit", "净利": "net_profit", "归母净利润": "net_profit",
+        "营收": "total_operating_revenue", "营业收入": "total_operating_revenue",
+        "收入": "total_operating_revenue", "营业总收入": "total_operating_revenue",
+        "利润总额": "total_profit",
+        "总资产": "asset_total_assets", "负债": "liability_total_liabilities",
+        "净资产": "equity_total_equity",
+        "经营现金流": "operating_cf_net_amount",
+        "现金流": "operating_cf_net_amount",
+        "毛利率": "gross_profit_margin", "净利率": "net_profit_margin",
+        "资产负债率": "asset_liability_ratio",
+        "ROE": "roe_weighted_excl_non_recurring",
+    }
+    # 反向映射：英文 → 中文（手动指定常用中文名）
+    METRIC_EN_TO_CN = {
+        "net_profit": "净利润",
+        "total_operating_revenue": "营收",
+        "total_profit": "利润总额",
+        "asset_total_assets": "总资产",
+        "liability_total_liabilities": "总负债",
+        "equity_total_equity": "净资产",
+        "operating_cf_net_amount": "经营现金流",
+        "gross_profit_margin": "毛利率",
+        "net_profit_margin": "净利率",
+        "asset_liability_ratio": "资产负债率",
+        "roe_weighted_excl_non_recurring": "ROE",
+    }
+
     def _extract_metric(self, question):
         """提取指标对应的数据库字段名"""
-        mapping = {
-            "净利润": "net_profit", "净利": "net_profit", "归母净利润": "net_profit",
-            "营收": "total_operating_revenue", "营业收入": "total_operating_revenue",
-            "收入": "total_operating_revenue", "营业总收入": "total_operating_revenue",
-            "利润总额": "total_profit",
-            "总资产": "asset_total_assets", "负债": "liability_total_liabilities",
-            "净资产": "equity_total_equity",
-            "经营现金流": "operating_cf_net_amount",
-            "现金流": "operating_cf_net_amount",
-            "毛利率": "gross_profit_margin", "净利率": "net_profit_margin",
-            "资产负债率": "asset_liability_ratio",
-            "ROE": "roe_weighted_excl_non_recurring",
-        }
         # 先匹配长的关键词（"净利润"优先于"利润"）
-        for kw in sorted(mapping.keys(), key=len, reverse=True):
+        for kw in sorted(self.METRIC_CN_TO_EN.keys(), key=len, reverse=True):
             if kw in question:
-                return mapping[kw]
+                return self.METRIC_CN_TO_EN[kw]
         return "net_profit"
+
+    def _metric_to_cn(self, metric_en):
+        """将英文字段名转成中文名"""
+        return self.METRIC_EN_TO_CN.get(metric_en, metric_en)
 
     def _extract_year(self, question):
         """提取年份"""
@@ -427,15 +463,9 @@ class FinanceAgent:
                 return followup
 
         task_type = self._classify(question)
-        clarify = self._check_slots(question, task_type)
+        clarify = self._check_slots(question, task_type, session)
         if clarify:
             return {"answer": clarify, "steps": 0, "history": [], "session_id": session_id}
-
-        if session.is_followup(question) and session.slots.get("company"):
-            merged = session.merge_question(question)
-            question = question + "（上下文：公司=%s, 指标=%s）" % (
-                merged.get("company", ""), merged.get("indicator", "")
-            )
 
         plan = self._plan(task_type)
         print(f"\n[Agent] Task: {task_type.value}, Plan: {' → '.join(plan)}")
@@ -447,10 +477,22 @@ class FinanceAgent:
         # 自动生成图表（数据>=3行时）
         chart_html = None
         if sql_data and sql_data.get("data") and len(sql_data["data"]) >= 3:
-            chart_html = self._generate_chart(sql_data["data"], self._extract_metric(question))
+            metric_en = self._extract_metric(question)
+            metric_cn = self._metric_to_cn(metric_en)
+            chart_html = self._generate_chart(sql_data["data"], metric_cn)
 
         if sql_data:
             session.update_slots(sql_data.get("slots", {}))
+            # 从问题中提取公司名和指标，补充到 session
+            extracted_company = self._extract_company(question)
+            if extracted_company:
+                session.slots["company"] = extracted_company
+            extracted_metric = self._extract_metric(question)
+            if extracted_metric:
+                session.slots["indicator"] = extracted_metric
+            extracted_year = self._extract_year(question)
+            if extracted_year != 2024:  # 2024 是默认值，不保存
+                session.slots["year"] = extracted_year
             # 保存本轮数据供追问使用
             session.add_turn(question, final_answer, session.slots,
                            data=sql_data.get("data"), task_type=task_type.value)
@@ -517,7 +559,7 @@ class FinanceAgent:
             else:
                 parts.append(f"无结果: {r.get('error', '')}")
 
-        parts.append("\n请根据以上数据用自然语言回答。保留所有数字和结论，只改表达方式。直接输出答案，不要输出JSON。")
+        parts.append("\n请根据以上数据用自然语言回答。保留所有数字和结论，只改表达方式。直接输出答案，不要输出JSON，不要使用*、#、-等Markdown格式符号。")
         context = "\n".join(parts)
 
         raw = self.llm.chat(SYSTEM_PROMPT, context, temperature=0.3)
