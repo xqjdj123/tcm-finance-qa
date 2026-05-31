@@ -1,0 +1,1766 @@
+[
+  {
+    "input": "问题：金花股份利润总额是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"金花股份\", \"indicator\": \"利润总额\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：2025年第三季度的\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"金花股份\", \"indicator\": \"利润总额\", \"year\": 2025, \"period\": \"Q3\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：金花股份近几年的利润总额变化趋势是什么样的\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"金花股份\", \"indicator\": \"利润总额\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：999与白云山相比，去年收益率最高的是\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"999\", \"白云山\"], \"year\": 2025, \"indicator\": \"净资产收益率\", \"top_k\": 1}"
+  },
+  {
+    "input": "问题：2025年前三季度，公司实现收入超过200亿元的企业有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\", \"condition\": {\"type\": \">\", \"value\": \"200亿\"}}"
+  },
+  {
+    "input": "问题：企业名称：三金，第三季度公司主营业务收入是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"三金\", \"indicator\": \"营业总收入\", \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：2025年第三季度的\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"三金\", \"indicator\": \"营业总收入\", \"year\": 2025, \"period\": \"Q3\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：分析一下千金药业2025收入情况，看看有什么变化。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"千金药业\", \"indicator\": \"营业总收入\", \"year\": 2025, \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：绘制近3年的收入趋势图\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"千金药业\", \"indicator\": \"营业总收入\", \"time_range\": \"近三年\", \"needs_chart\": true, \"chart_type\": \"line\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：绘制水平柱状图\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"千金药业\", \"indicator\": \"营业总收入\", \"time_range\": \"近三年\", \"needs_chart\": true, \"chart_type\": \"bar\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：哪些企业是亏钱的？\n输出JSON：",
+    "output": "{\"intent\": \"fuzzy_intent\", \"indicator\": \"净利润\", \"condition\": {\"type\": \"<\", \"value\": 0}}"
+  },
+  {
+    "input": "问题：“亏钱”在业务场景中，指的是经审计财务报表的核心利润指标为负的数据。\n输出JSON：",
+    "output": "{\"intent\": \"fuzzy_intent\", \"indicator\": \"净利润\", \"condition\": {\"type\": \"<\", \"value\": 0}, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：香雪制药2024年研发费用是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"香雪制药\", \"indicator\": \"研发费用\", \"year\": 2024, \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：销售费用是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"香雪制药\", \"indicator\": \"销售费用\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：2025年第三季度，66家中药公司中“营业总收入”和“净利润”均排名前五的公司有哪些？请列出其股票代码、简称、营业总收入（万元）、净利润（万元）\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicators\": [\"营业总收入\", \"净利润\"], \"top_k\": 5}"
+  },
+  {
+    "input": "问题：对比白云山（600332）2022年至2025年第三季度的“营业总收入同比增长率”，展示各报告期的增长率数据，并生成趋势折线图。\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"company\": \"白云山\", \"indicator\": \"营业总收入同比增长率\", \"time_range\": \"2022-2025年第三季度\", \"needs_chart\": true, \"chart_type\": \"line\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，资产负债率（负债总额/资产总额）超过60%的中药公司有哪些？请列出股票代码、简称、资产负债率（%）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"资产负债率\", \"condition\": {\"type\": \">\", \"value\": \"60%\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，“经营性现金流量净额”为负数且“净利润”为正数的公司有哪些？请列出其股票代码、简称、经营性现金流净额（万元）、净利润（万元）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicators\": [\"经营性现金流净额\", \"净利润\"], \"condition\": {\"type\": \"<\", \"value\": 0, \"indicator\": \"经营性现金流净额\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，“销售毛利率”和“销售净利率”均高于行业均值的中药公司有哪些？请同步输出行业均值和公司具体数值。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicators\": [\"销售毛利率\", \"销售净利率\"]}"
+  },
+  {
+    "input": "问题：云南白药（000538）2025年第三季度的“营业总收入环比增长率”与2024年第三季度的环比增长率相比，变化了多少？请展示两年同期的环比数据。\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"company\": \"云南白药\", \"indicator\": \"营业总收入环比增长率\", \"year\": 2025, \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：2022-2025年第三季度，“加权平均净资产收益率（扣非）”连续四个报告期均超过10%的公司有哪些？请列出股票代码、简称及各期收益率。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"time_range\": \"2022-2025年第三季度\", \"indicator\": \"加权平均净资产收益率\", \"condition\": {\"type\": \">\", \"value\": \"10%\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，“资产-存货”金额排名前三的公司，其“营业总收入”与存货金额的比值分别是多少？请列出公司简称、存货（万元）、营业总收入（万元）及比值。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"存货\", \"top_k\": 3}"
+  },
+  {
+    "input": "问题：2025年第三季度，“资产-应收账款”占“营业总收入”比例超过30%的公司有哪些？请列出股票代码、简称、应收账款占比（%）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"应收账款\", \"condition\": {\"type\": \">\", \"value\": \"30%\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，“净利润同比增长率”波动最大（即与2024年同期相比，增幅或降幅绝对值最大）的3家公司是哪些？请展示具体增长率。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润同比增长率\", \"top_k\": 3}"
+  },
+  {
+    "input": "问题：2025年第三季度，“营业总支出-研发费用”占“营业总收入”比例排名前五的公司有哪些？请列出简称、研发费用占比（%）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"研发费用\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第三季度，“股东权益-未分配利润”金额排名前五的公司，其2025年的“净利润”占未分配利润的比例是多少？请展示具体数值。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"未分配利润\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第三季度，“负债-短期借款”金额超过“资产-货币资金”金额的公司有哪些？请列出简称、短期借款（万元）、货币资金（万元）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicators\": [\"短期借款\", \"货币资金\"]}"
+  },
+  {
+    "input": "问题：2025年第三季度，“核心业绩指标表”中的“营业总收入”与“利润表”中的“营业总收入”不一致的公司有哪些？请列出股票代码及两个表中的数值。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\"}"
+  },
+  {
+    "input": "问题：计算2022年财报至2025年第三季度，66家公司的营业总收入复合增长率，排名前三的公司是哪些？请展示复合增长率（%）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"time_range\": \"2022-2025年第三季度\", \"indicator\": \"营业总收入同比增长率\", \"top_k\": 3}"
+  },
+  {
+    "input": "问题：2025年第三季度，“扣非净利润”与“净利润”的差值绝对值最大的5家公司是哪些？请列出简称、净利润（万元）、扣非净利润（万元）及差值。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicators\": [\"扣非净利润\", \"净利润\"], \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第三季度，“投资性现金流量净额”为正数（即投资现金流入大于流出）的公司有多少家？请列出其中营收排名前三的公司简称及投资现金流净额（万元）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"投资性现金流净额\", \"condition\": {\"type\": \">\", \"value\": 0}, \"top_k\": 3}"
+  },
+  {
+    "input": "问题：2025年第三季度，“营业总支出-销售费用”占“营业总收入”比例低于行业均值的公司中，“净利润”最高的3家是哪些？请同步展示行业均值。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售费用率\", \"top_k\": 3}"
+  },
+  {
+    "input": "问题：2025年第三季度，“资产-总资产同比增长率”超过“营业总收入同比增长率”10个百分点以上的公司有哪些？请列出简称、资产增长率（%）、营收增长率（%）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicators\": [\"总资产同比增长率\", \"营业总收入同比增长率\"]}"
+  },
+  {
+    "input": "问题：对比白云山（600332）、云南白药（000538）、片仔癀（600436）2022-2025年第三季度的“净利润（万元）”，生成多系列折线图展示趋势。\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"白云山\", \"云南白药\", \"片仔癀\"], \"time_range\": \"2022-2025年第三季度\", \"indicator\": \"净利润\", \"needs_chart\": true, \"chart_type\": \"line\"}"
+  },
+  {
+    "input": "问题：2025年第三季度所有上市公司的股票代码、公司简称和营业总收入（单位：万元），按营业总收入从高到低排序。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\"}"
+  },
+  {
+    "input": "问题：2022年片仔癀的总资产、总负债、所有者权益总额分别是多少？\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"片仔癀\", \"indicators\": [\"总资产\", \"总负债\", \"所有者权益总额\"], \"year\": 2022, \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：2025年第三季度净利润为负的公司有哪些？请列出股票代码、公司简称、净利润（万元）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润\", \"condition\": {\"type\": \"<\", \"value\": 0}}"
+  },
+  {
+    "input": "问题：2025年第三季度，在66家公司中，“营业总收入”和“销售毛利率”这两项指标均进入行业前50%的公司有哪些？请列出简称、营业总收入（万元）、销售毛利率（%）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicators\": [\"营业总收入\", \"销售毛利率\"]}"
+  },
+  {
+    "input": "问题：2024年报告期“净利润”与“经营性现金流量净额”均进入行业前30%的公司有哪些？请列出公司简称、净利润（万元）、经营性现金流净额（万元）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2024, \"period\": \"FY\", \"indicators\": [\"净利润\", \"经营性现金流净额\"]}"
+  },
+  {
+    "input": "问题：云南白药在2025年第三季度的营业总收入是多少？\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"云南白药\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，“净利润同比增长率”超过50%的公司有哪些？请列出股票代码、公司简称、净利润同比增长率（%）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润同比增长率\", \"condition\": {\"type\": \">\", \"value\": \"50%\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，“资产负债率”最低的10家公司有哪些？请列出公司简称、资产负债率（%）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"资产负债率\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：2025年第三季度，“销售净利率”最高的公司是哪一家？请列出公司简称、销售净利率（%）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售净利率\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，营业总收入超过10亿元的公司，其“资产负债率”和“经营性现金流量净额”分别是多少？请列出公司简称、营业总收入（万元）、资产负债率（%）、经营性现金流净额（万元）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\", \"condition\": {\"type\": \">\", \"value\": \"10亿\"}, \"indicators\": [\"资产负债率\", \"经营性现金流净额\"]}"
+  },
+  {
+    "input": "问题：2022-2025年第三季度，连续四个报告期“扣非净利润”均超过1亿元的公司有哪些？请列出各公司各期扣非净利润（万元）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"time_range\": \"2022-2025年第三季度\", \"indicator\": \"扣非净利润\", \"condition\": {\"type\": \">\", \"value\": \"1亿\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，“货币资金”占“总资产”比例超过20%，且“投资性现金流量净额”为负的公司有哪些？请列出公司简称、货币资金占比（%）、投资现金流净额（万元）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"货币资金\", \"condition\": {\"type\": \">\", \"value\": \"20%\"}, \"indicator\": \"投资性现金流净额\"}"
+  },
+  {
+    "input": "问题：请统计2025年第三季度，66家公司的营业总收入总规模。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，研发费用占比最高的5家公司是哪些？请列出公司简称、研发费用占比（%）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"研发费用占比\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第三季度，销售毛利率最高且净利润为正的5家公司是哪些？请列出公司简称、销售毛利率（%）、净利润（万元）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicators\": [\"净利润\", \"销售毛利率\"]}"
+  },
+  {
+    "input": "问题：2025年第三季度，营业总收入最高的5家公司是哪些？请列出公司简称、营业总收入（万元）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：上述5家公司中，哪家净利润最高？请列出公司简称、净利润（万元）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润\", \"top_k\": 5, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：在上述5家公司中，哪家净利润同比增长率最高？请列出公司简称、净利润同比增长率（%）。\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润同比增长率\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请展示云南白药2022-2025年第三季度的资产负债率变化趋势。\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"云南白药\", \"indicator\": \"资产负债率\", \"time_range\": \"2022-2025年第三季度\"}"
+  },
+  {
+    "input": "问题：请将云南白药与白云山的资产负债率进行对比。\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"云南白药\", \"白云山\"], \"indicator\": \"资产负债率\", \"time_range\": \"2022-2025年第三季度\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：两家公司的总负债与总资产情况分别是怎样的？请分析一下。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"companies\": [\"云南白药\", \"白云山\"], \"indicators\": [\"总负债\", \"总资产\"], \"needs_reasoning\": true, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：2025年第三季度，经营性现金流量净额为负的公司有哪些？请列出公司简称、经营性现金流净额（万元）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"经营性现金流净额\", \"condition\": {\"type\": \"<\", \"value\": 0}}"
+  },
+  {
+    "input": "问题：在上述公司中，资产负债率超过60%的有哪些？请列出公司简称、资产负债率（%）。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"资产负债率\", \"condition\": {\"type\": \">\", \"value\": \"60%\"}, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，研发费用占比最高的10家公司。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"研发费用占比\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：请分析这些公司的销售毛利率情况。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售毛利率\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请列出2024年第三季度，净利润最高的3家公司。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2024, \"period\": \"Q3\", \"indicator\": \"净利润\", \"top_k\": 3}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，净利润最高的3家公司。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润\", \"top_k\": 3, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请对比两年第三季度的营业总收入情况。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请展示2025年第三季度，营业总收入排名前10的公司，并用柱状图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\", \"top_k\": 10, \"needs_chart\": true, \"chart_type\": \"bar\"}"
+  },
+  {
+    "input": "问题：请展示云南白药2022-2025年第三季度的净利润变化趋势，并用折线图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"云南白药\", \"indicator\": \"净利润\", \"time_range\": \"2022-2025年第三季度\", \"needs_chart\": true, \"chart_type\": \"line\"}"
+  },
+  {
+    "input": "问题：请对比白云山、云南白药、片仔癀2025年第三季度的销售毛利率、销售净利率、净资产收益率，并用雷达图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"白云山\", \"云南白药\", \"片仔癀\"], \"year\": 2025, \"period\": \"Q3\", \"indicators\": [\"销售毛利率\", \"销售净利率\", \"净资产收益率\"], \"needs_chart\": true, \"chart_type\": \"radar\"}"
+  },
+  {
+    "input": "问题：请展示2025年第三季度，66家公司的资产负债率分布情况，并用饼图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"资产负债率\", \"needs_chart\": true, \"chart_type\": \"pie\"}"
+  },
+  {
+    "input": "问题：请展示2025年第三季度，66家公司的净利润分布情况，并用直方图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"needs_chart\": true, \"chart_type\": \"histogram\"}"
+  },
+  {
+    "input": "问题：请展示研发费用占比的变化趋势，并用折线图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"indicator\": \"研发费用占比\", \"time_range\": \"2022-2025年第三季度\", \"needs_chart\": true, \"chart_type\": \"line\"}"
+  },
+  {
+    "input": "问题：请对比2025年第三季度，66家公司的净利润同比增长率，并用柱状图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润同比增长率\", \"needs_chart\": true, \"chart_type\": \"bar\"}"
+  },
+  {
+    "input": "问题：请展示2025年第三季度，存货周转率排名前5的公司，并用柱状图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"存货周转率\", \"top_k\": 5, \"needs_chart\": true, \"chart_type\": \"bar\"}"
+  },
+  {
+    "input": "问题：请展示2025年第三季度，66家公司的营业总收入与净利润的关系，并用散点图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicators\": [\"营业总收入\", \"净利润\"], \"needs_chart\": true, \"chart_type\": \"scatter\"}"
+  },
+  {
+    "input": "问题：请展示2025年第三季度，短期借款排名前10的公司，并用柱状图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"短期借款\", \"needs_chart\": true, \"chart_type\": \"bar\"}"
+  },
+  {
+    "input": "问题：请展示片仔癀2022-2025年第三季度的扣非净利润占比变化趋势，并用折线图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"片仔癀\", \"indicator\": \"扣非净利润占比\", \"time_range\": \"2022-2025年第三季度\", \"needs_chart\": true, \"chart_type\": \"line\"}"
+  },
+  {
+    "input": "问题：请展示2025年第三季度，66家公司的销售净利率分布情况，并用箱线图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"needs_chart\": true, \"chart_type\": \"box\"}"
+  },
+  {
+    "input": "问题：请展示2025年第三季度，投资性现金流净额为正的公司，并用柱状图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"投资性现金流净额\", \"needs_chart\": true, \"chart_type\": \"bar\"}"
+  },
+  {
+    "input": "问题：请展示2025年第三季度，营业总成本排名前10的公司，并用柱状图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总成本\", \"top_k\": 10, \"needs_chart\": true, \"chart_type\": \"bar\"}"
+  },
+  {
+    "input": "问题：请展示2022-2025年第三季度，66家公司的营业总收入同比增长率分布情况，并用直方图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"time_range\": \"2022-2025年第三季度\", \"indicator\": \"营业总收入同比增长率\", \"needs_chart\": true, \"chart_type\": \"histogram\"}"
+  },
+  {
+    "input": "问题：请展示2025年第三季度，66家公司的净资产收益率分布情况，并用柱状图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"needs_chart\": true, \"chart_type\": \"bar\"}"
+  },
+  {
+    "input": "问题：请展示2025年第三季度，出口业务占比超过10%的公司，并用折线图可视化其出口业务占比变化趋势。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"出口业务占比\", \"condition\": {\"type\": \">\", \"value\": \"10%\"}, \"needs_chart\": true, \"chart_type\": \"line\"}"
+  },
+  {
+    "input": "问题：请分析一下中药行业的整体发展趋势。\n输出JSON：",
+    "output": "{\"intent\": \"fuzzy_intent\"}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，营业总收入和净利润均排名前10的公司。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicators\": [\"营业总收入\", \"净利润\"], \"top_k\": 10, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请分析这些公司的共同特点。\n输出JSON：",
+    "output": "{\"intent\": \"fuzzy_intent\"}"
+  },
+  {
+    "input": "问题：请分析这些公司的资产负债率情况。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"资产负债率\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请分析一下这些公司的财务状况。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：请分析这些公司的销售毛利率和销售净利率情况。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicators\": [\"销售毛利率\", \"销售净利率\"], \"needs_reasoning\": true, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请分析一下这些公司的市场竞争力。\n输出JSON：",
+    "output": "{\"intent\": \"fuzzy_intent\"}"
+  },
+  {
+    "input": "问题：请分析这些公司的营业总收入和净利润情况。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicators\": [\"营业总收入\", \"净利润\"], \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请分析这些公司的净利润同比增长率情况。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润同比增长率\"}"
+  },
+  {
+    "input": "问题：请分析这些公司中，净利润同比增长率超过20%的公司情况。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润同比增长率\", \"condition\": {\"type\": \">\", \"value\": \"20%\"}, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请列出2024年利润最高的top10企业是哪些？这些企业的利润、销售额年同比是多少？年同比上涨幅度最大的是哪家\n输出JSON：",
+    "output": "{\"intent\": \"multi_step\", \"year\": 2024, \"indicator\": \"净利润\", \"top_k\": 10, \"indicators\": [\"净利润\", \"营业总收入\"], \"sub_questions_count\": 3}"
+  },
+  {
+    "input": "问题：请分析一下中药行业的竞争格局。\n输出JSON：",
+    "output": "{\"intent\": \"fuzzy_intent\"}"
+  },
+  {
+    "input": "问题：华润三九近三年的主营业务收入情况做可视化绘图\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"华润三九\", \"indicator\": \"营业总收入\", \"time_range\": \"近三年\", \"needs_chart\": true, \"chart_type\": \"line\"}"
+  },
+  {
+    "input": "问题：主营业务收入上升的原因是什么\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"indicator\": \"营业总收入\", \"needs_reasoning\": true, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：北向资金占A股每天成交金额的15%，影响力不可谓不大，外资集体撤退大A股还顶得住吗\n输出JSON：",
+    "output": "{\"intent\": \"open_question\"}"
+  },
+  {
+    "input": "问题：片仔癀利润总额是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"片仔癀\", \"indicator\": \"利润总额\"}"
+  },
+  {
+    "input": "问题：2025年第三季度的\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"片仔癀\", \"indicator\": \"利润总额\", \"year\": 2025, \"period\": \"Q3\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请分析一下片仔癀2025年第三季度的利润总额情况，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"片仔癀\", \"indicator\": \"利润总额\", \"year\": 2025, \"period\": \"Q3\", \"needs_reasoning\": true, \"needs_rag\": true, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请展示片仔癀近几年的利润总额变化趋势。\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"片仔癀\", \"indicator\": \"利润总额\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：请结合研报分析一下片仔癀近几年的利润总额变化趋势。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"片仔癀\", \"indicator\": \"利润总额\", \"time_range\": \"近三年\", \"needs_reasoning\": true, \"needs_rag\": true, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：999与白云山相比，去年收益率最高的是\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"999\", \"白云山\"], \"year\": 2025, \"indicator\": \"净资产收益率\", \"top_k\": 1}"
+  },
+  {
+    "input": "问题：请结合研报分析一下999和白云山的净资产收益率情况。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"companies\": [\"999\", \"白云山\"], \"indicator\": \"净资产收益率\", \"needs_reasoning\": true, \"needs_rag\": true, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请结合研报分析一下999和白云山的整体情况。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"companies\": [\"999\", \"白云山\"], \"needs_rag\": true, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：2025年前三季度，公司实现收入超过200亿元的企业有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\", \"condition\": {\"type\": \">\", \"value\": \"200亿\"}}"
+  },
+  {
+    "input": "问题：请结合研报分析一下这些公司的收入情况。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\", \"condition\": {\"type\": \">\", \"value\": \"200亿\"}, \"needs_reasoning\": true, \"needs_rag\": true, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：企业名称：三金，第三季度公司主营业务收入是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"三金\", \"indicator\": \"营业总收入\", \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：2025年第三季度的\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"三金\", \"indicator\": \"营业总收入\", \"year\": 2025, \"period\": \"Q3\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请结合研报分析一下三金的主营业务收入情况。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"三金\", \"indicator\": \"营业总收入\", \"year\": 2025, \"period\": \"Q3\", \"needs_reasoning\": true, \"needs_rag\": true, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：分析一下佐力药业2025收入情况，看看有什么变化。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"佐力药业\", \"indicator\": \"营业总收入\", \"year\": 2025, \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：绘制近3年的收入趋势图\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"佐力药业\", \"indicator\": \"营业总收入\", \"time_range\": \"近三年\", \"needs_chart\": true, \"chart_type\": \"line\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：绘制水平柱状图\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"佐力药业\", \"indicator\": \"营业总收入\", \"time_range\": \"近三年\", \"needs_chart\": true, \"chart_type\": \"bar\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请结合研报分析一下佐力药业的收入变化趋势。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"佐力药业\", \"indicator\": \"营业总收入\", \"time_range\": \"近三年\", \"needs_reasoning\": true, \"needs_rag\": true, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：哪些企业是亏钱的？\n输出JSON：",
+    "output": "{\"intent\": \"fuzzy_intent\", \"indicator\": \"净利润\", \"condition\": {\"type\": \"<\", \"value\": 0}}"
+  },
+  {
+    "input": "问题：“亏钱”在业务场景中，指的是经审计财务报表的核心利润指标为负的数据。\n输出JSON：",
+    "output": "{\"intent\": \"fuzzy_intent\", \"indicator\": \"净利润\", \"condition\": {\"type\": \"<\", \"value\": 0}, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请结合研报分析一下这些亏钱企业的情况。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"indicator\": \"净利润\", \"condition\": {\"type\": \"<\", \"value\": 0}, \"needs_reasoning\": true, \"needs_rag\": true, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：太极集团2024年研发费用是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"太极集团\", \"indicator\": \"研发费用\", \"year\": 2024, \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：销售费用是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"太极集团\", \"indicator\": \"销售费用\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请结合研报分析一下太极集团的研发费用和销售费用占比情况。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"太极集团\", \"indicators\": [\"研发费用\", \"销售费用\", \"营业总收入\"], \"needs_reasoning\": true, \"needs_rag\": true, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请分析一下中药行业的研发投入情况。\n输出JSON：",
+    "output": "{\"intent\": \"fuzzy_intent\"}"
+  },
+  {
+    "input": "问题：请对比各公司的营业总收入半年报情况。\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"indicator\": \"营业总收入\", \"period\": \"HY\"}"
+  },
+  {
+    "input": "问题：请结合研报分析一下各公司的营业总收入情况。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"indicator\": \"营业总收入\", \"needs_rag\": true, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请分析一下方盛制药2025年第三季度的营业总收入情况，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"company\": \"方盛制药\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\", \"needs_reasoning\": true, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，研发费用占比排名前5的公司，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"top_k\": 5, \"indicator\": \"研发费用占比\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，净利润同比增长率排名，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润同比增长率\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请分析以岭药业2024-2025年第三季度的销售毛利率，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"company\": \"以岭药业\", \"time_range\": \"2024-2025年第三季度\", \"indicator\": \"销售毛利率\", \"needs_reasoning\": true, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，配方颗粒业务收入占比超过30%的公司，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"配方颗粒业务收入占比\", \"condition\": {\"type\": \">\", \"value\": \"30%\"}, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，经营性现金流量净额排名，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"经营性现金流净额\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，资产负债率排名，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"资产负债率\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度的整体情况，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"needs_reasoning\": true, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，营业总收入同比增长率排名，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入同比增长率\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，应收账款占营业总收入比例排名，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"应收账款占营业总收入比例\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，饮片业务收入排名前10的公司，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"top_k\": 10, \"indicator\": \"饮片业务收入\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，销售费用率排名，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售费用率\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，总资产排名，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"总资产\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，老年病相关药品收入占比排名前5的公司，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"top_k\": 5, \"indicator\": \"老年病相关药品收入占比\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，海外业务收入排名，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"海外业务收入\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度的销售净利率情况，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售净利率\", \"needs_reasoning\": true, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，存货周转率排名，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"存货周转率\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，电商推广费占比排名前5的公司，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"top_k\": 5, \"indicator\": \"电商推广费占比\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，净利润排名，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，出口业务占比超过10%的公司，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"出口业务占比\", \"condition\": {\"type\": \">\", \"value\": \"10%\"}, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请分析一下2025年第三季度的情况，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"needs_rag\": true, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，研发费用占比排名前5的公司，并对比2022-2025年第三季度的情况，结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"top_k\": 5, \"time_range\": \"2022-2025年第三季度\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，资产负债率排名。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"资产负债率\"}"
+  },
+  {
+    "input": "问题：请分析一下这些公司的资产负债率情况。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"资产负债率\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：云南白药在2025年第三季度的营业总收入是多少？\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"云南白药\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\"}"
+  },
+  {
+    "input": "问题：请分析一下云南白药的营业总收入情况。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"云南白药\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，净利润同比增长率超过100%的公司。\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润同比增长率\", \"condition\": {\"type\": \">\", \"value\": \"100%\"}}"
+  },
+  {
+    "input": "问题：请分析一下这些公司的净利润同比增长率情况。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润同比增长率\", \"condition\": {\"type\": \">\", \"value\": \"100%\"}, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，营业总收入超过10亿元的公司，其资产负债率和经营性现金流量净额分别是多少？\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\", \"condition\": {\"type\": \">\", \"value\": \"10亿\"}, \"indicators\": [\"资产负债率\", \"经营性现金流净额\"]}"
+  },
+  {
+    "input": "问题：请分析一下这些公司的整体情况。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"year\": 2025, \"period\": \"Q3\", \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请分析一下2025年第三季度的整体情况，并列出净利润最高的公司，分析其收入增长率，结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"needs_rag\": true, \"year\": 2025, \"period\": \"Q3\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：请分析云南白药2022-2025年第三季度的销售净利率、研发费用占比，结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"needs_rag\": true, \"company\": \"云南白药\", \"time_range\": \"2022-2025年第三季度\"}"
+  },
+  {
+    "input": "问题：请展示2025年第三季度，66家公司的营业总收入与净利润的关系，并用散点图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"year\": 2025, \"period\": \"Q3\", \"needs_chart\": true, \"chart_type\": \"scatter\"}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度，研发费用占比最高的公司，结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"needs_rag\": true, \"year\": 2025, \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，净利润排名前10的公司。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"year\": 2025, \"period\": \"Q3\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度，资产负债率超过60%的公司，结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"needs_rag\": true, \"year\": 2025, \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度，研发费用占比排名前10的公司，并用柱状图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"year\": 2025, \"period\": \"Q3\", \"top_k\": 10, \"needs_chart\": true, \"chart_type\": \"bar\"}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度，存货周转率最高的公司，结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"needs_rag\": true, \"year\": 2025, \"period\": \"Q3\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度，净利润同比增长率最高的公司，结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"needs_rag\": true, \"year\": 2025, \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度，资产负债率最低的公司。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"year\": 2025, \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度，经营性现金流量净额最高的公司，结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"needs_rag\": true, \"year\": 2025, \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度，销售毛利率最高的公司。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"year\": 2025, \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度，应收账款占比最低的公司，结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"needs_rag\": true, \"year\": 2025, \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度，净资产收益率最高的公司。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"year\": 2025, \"period\": \"Q3\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：请分析2022-2025年第三季度，营业总收入复合增长率最高的公司。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"time_range\": \"2022-2025年第三季度\"}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度，扣非净利润最高的公司，结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"needs_rag\": true, \"year\": 2025, \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度，海外业务收入最高的公司，结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"needs_rag\": true, \"year\": 2025, \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：请分析一下中药行业的未来发展趋势。\n输出JSON：",
+    "output": "{\"intent\": \"open_question\"}"
+  },
+  {
+    "input": "问题：请对比三九、白云山、云南白药、片仔癀2022-2025年第三季度的净利润，并用折线图可视化。\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"sub_questions_count\": 4, \"companies\": [\"三九\", \"白云山\", \"云南白药\", \"片仔癀\"], \"time_range\": \"2022-2025年第三季度\", \"needs_chart\": true, \"chart_type\": \"line\"}"
+  },
+  {
+    "input": "问题：请分析一下这些公司的发展策略，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"needs_rag\": true, \"is_multi_turn\": true}"
+  },
+  {
+    "input": "问题：请分析香雪制药2025年第三季度的净利润情况，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"香雪制药\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润\", \"needs_reasoning\": true, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请分析康芝药业2025年第三季度的经营性现金流量净额和净利润情况，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"康芝药业\", \"year\": 2025, \"period\": \"Q3\", \"indicators\": [\"经营性现金流净额\", \"净利润\"], \"needs_reasoning\": true, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请分析奇正藏药2025年第三季度的资产负债率情况，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"奇正藏药\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"资产负债率\", \"needs_reasoning\": true, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：请分析达仁堂2025年第三季度的销售毛利率情况，并结合研报分析。\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"达仁堂\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售毛利率\", \"needs_reasoning\": true, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：同仁堂的营业总收入是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"同仁堂\", \"indicator\": \"营业总收入\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：华润三九的净利润是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"华润三九\", \"indicator\": \"净利润\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：白云山的净资产收益率是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"白云山\", \"indicator\": \"净资产收益率\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，营业总收入排名前10的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：2025年第三季度，净利润排名前5的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：云南白药近三年的净利润变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"云南白药\", \"indicator\": \"净利润\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：片仔癀和云南白药相比，2025年净资产收益率谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"片仔癀\", \"云南白药\"], \"year\": 2025, \"indicator\": \"净资产收益率\"}"
+  },
+  {
+    "input": "问题：请分析东阿阿胶2025年净利润增长的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"东阿阿胶\", \"year\": 2025, \"indicator\": \"净利润\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：2025年各中药企业研发情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"indicator\": \"研发费用\", \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：2025年中药公司的研发费用\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"indicator\": \"研发费用\", \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：各中药企业2025年研发投入多少\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"indicator\": \"研发费用\", \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：2025年中药行业的研发开支排名\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"indicator\": \"研发费用\", \"period\": \"Q3\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：天士力的营业总收入是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"天士力\", \"indicator\": \"营业总收入\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：康恩贝的净利润是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"康恩贝\", \"indicator\": \"净利润\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：步长制药的净资产收益率是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"步长制药\", \"indicator\": \"净资产收益率\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：以岭药业的销售毛利率是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"以岭药业\", \"indicator\": \"销售毛利率\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：众生药业的研发费用是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"众生药业\", \"indicator\": \"研发费用\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：科伦药业的资产负债率是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"科伦药业\", \"indicator\": \"资产负债率\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：华润双鹤的经营性现金流量净额是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"华润双鹤\", \"indicator\": \"经营性现金流量净额\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：华东医药的总资产是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"华东医药\", \"indicator\": \"总资产\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：桂林三金的存货是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"桂林三金\", \"indicator\": \"存货\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：九芝堂的应收账款是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"九芝堂\", \"indicator\": \"应收账款\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：太极集团的货币资金是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"太极集团\", \"indicator\": \"货币资金\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：千金药业的利润总额是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"千金药业\", \"indicator\": \"利润总额\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：康芝药业的销售费用是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"康芝药业\", \"indicator\": \"销售费用\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：奇正藏药的扣非净利润是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"奇正藏药\", \"indicator\": \"扣非净利润\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：达仁堂的销售净利率是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"达仁堂\", \"indicator\": \"销售净利率\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：康美药业的营业总成本是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"康美药业\", \"indicator\": \"营业总成本\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：佐力药业的营业总收入同比增长率是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"佐力药业\", \"indicator\": \"营业总收入同比增长率\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：陇神戎发的净利润同比增长率是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"陇神戎发\", \"indicator\": \"净利润同比增长率\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：新天药业的总资产同比增长率是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"新天药业\", \"indicator\": \"总资产同比增长率\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：健民集团的加权平均净资产收益率是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"健民集团\", \"indicator\": \"加权平均净资产收益率\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：贵州百灵的存货周转率是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"贵州百灵\", \"indicator\": \"存货周转率\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：振东制药的研发费用占比是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"振东制药\", \"indicator\": \"研发费用占比\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：方盛制药的销售费用率是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"方盛制药\", \"indicator\": \"销售费用率\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：同仁堂的研发费用是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"同仁堂\", \"indicator\": \"研发费用\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：华润三九的销售费用是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"华润三九\", \"indicator\": \"销售费用\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：白云山的货币资金是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"白云山\", \"indicator\": \"货币资金\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：云南白药的短期借款是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"云南白药\", \"indicator\": \"短期借款\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：片仔癀的总负债是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"片仔癀\", \"indicator\": \"总负债\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：东阿阿胶的所有者权益总额是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"东阿阿胶\", \"indicator\": \"所有者权益总额\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：广誉远的投资性现金流净额是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"广誉远\", \"indicator\": \"投资性现金流净额\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：2025年第一季度，营业总收入排名前5的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q1\", \"indicator\": \"营业总收入\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第二季度，净利润排名前10的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q2\", \"indicator\": \"净利润\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：2025年第四季度，研发费用排名前3的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q4\", \"indicator\": \"研发费用\", \"top_k\": 3}"
+  },
+  {
+    "input": "问题：2024年上半年，销售毛利率排名前5的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2024, \"period\": \"HY\", \"indicator\": \"销售毛利率\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2023年，净资产收益率排名前10的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2023, \"period\": \"FY\", \"indicator\": \"净资产收益率\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：2022年，资产负债率最低的5家公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2022, \"period\": \"FY\", \"indicator\": \"资产负债率\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第三季度，营业总收入超过100亿的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\", \"condition\": {\"type\": \">\", \"value\": \"100亿\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，净利润超过10亿的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润\", \"condition\": {\"type\": \">\", \"value\": \"10亿\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，研发费用超过5亿的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"研发费用\", \"condition\": {\"type\": \">\", \"value\": \"5亿\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，资产负债率超过60%的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"资产负债率\", \"condition\": {\"type\": \">\", \"value\": \"60%\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，销售净利率超过20%的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售净利率\", \"condition\": {\"type\": \">\", \"value\": \"20%\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，研发费用占比超过10%的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"研发费用占比\", \"condition\": {\"type\": \">\", \"value\": \"10%\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，经营性现金流量净额为正的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"经营性现金流量净额\", \"condition\": {\"type\": \">\", \"value\": 0}}"
+  },
+  {
+    "input": "问题：2025年第三季度，净利润为负的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润\", \"condition\": {\"type\": \"<\", \"value\": 0}}"
+  },
+  {
+    "input": "问题：2025年第三季度，销售费用率低于10%的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售费用率\", \"condition\": {\"type\": \"<\", \"value\": \"10%\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，存货周转率最高的公司是哪一家\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"存货周转率\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，扣非净利润最高的公司是哪一家\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"扣非净利润\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，总资产最高的公司是哪一家\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"总资产\"}"
+  },
+  {
+    "input": "问题：统计2025年第三季度所有公司的营业总收入情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\"}"
+  },
+  {
+    "input": "问题：统计2025年第三季度所有公司的净利润情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润\"}"
+  },
+  {
+    "input": "问题：统计2025年第三季度所有公司的研发费用情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"研发费用\"}"
+  },
+  {
+    "input": "问题：统计2025年第三季度所有公司的净资产收益率情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净资产收益率\"}"
+  },
+  {
+    "input": "问题：同仁堂近三年的营业总收入变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"同仁堂\", \"indicator\": \"营业总收入\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：华润三九近三年的净利润变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"华润三九\", \"indicator\": \"净利润\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：白云山近三年的研发费用变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"白云山\", \"indicator\": \"研发费用\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：云南白药近三年的净资产收益率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"云南白药\", \"indicator\": \"净资产收益率\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：片仔癀近三年的销售毛利率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"片仔癀\", \"indicator\": \"销售毛利率\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：东阿阿胶近三年的资产负债率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"东阿阿胶\", \"indicator\": \"资产负债率\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：广誉远近三年的经营性现金流量净额变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"广誉远\", \"indicator\": \"经营性现金流量净额\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：天士力近三年的存货周转率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"天士力\", \"indicator\": \"存货周转率\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：康恩贝近三年的扣非净利润变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"康恩贝\", \"indicator\": \"扣非净利润\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：步长制药近三年的总资产变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"步长制药\", \"indicator\": \"总资产\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：以岭药业2022-2025年的营业总收入变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"以岭药业\", \"indicator\": \"营业总收入\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：众生药业2022-2025年的净利润变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"众生药业\", \"indicator\": \"净利润\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：科伦药业2022-2025年的研发费用变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"科伦药业\", \"indicator\": \"研发费用\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：华润双鹤2022-2025年的净资产收益率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"华润双鹤\", \"indicator\": \"净资产收益率\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：华东医药2022-2025年的销售毛利率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"华东医药\", \"indicator\": \"销售毛利率\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：桂林三金近五年的营业总收入变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"桂林三金\", \"indicator\": \"营业总收入\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：九芝堂近五年的净利润变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"九芝堂\", \"indicator\": \"净利润\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：太极集团近五年的研发费用变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"太极集团\", \"indicator\": \"研发费用\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：香雪制药近五年的净资产收益率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"香雪制药\", \"indicator\": \"净资产收益率\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：千金药业近五年的销售毛利率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"千金药业\", \"indicator\": \"销售毛利率\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：同仁堂和华润三九相比，2025年营业总收入谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"同仁堂\", \"华润三九\"], \"year\": 2025, \"indicator\": \"营业总收入\"}"
+  },
+  {
+    "input": "问题：白云山和云南白药相比，2025年净利润谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"白云山\", \"云南白药\"], \"year\": 2025, \"indicator\": \"净利润\"}"
+  },
+  {
+    "input": "问题：片仔癀和东阿阿胶相比，2025年研发费用谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"片仔癀\", \"东阿阿胶\"], \"year\": 2025, \"indicator\": \"研发费用\"}"
+  },
+  {
+    "input": "问题：广誉远和天士力相比，2025年净资产收益率谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"广誉远\", \"天士力\"], \"year\": 2025, \"indicator\": \"净资产收益率\"}"
+  },
+  {
+    "input": "问题：康恩贝和步长制药相比，2025年销售毛利率谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"康恩贝\", \"步长制药\"], \"year\": 2025, \"indicator\": \"销售毛利率\"}"
+  },
+  {
+    "input": "问题：以岭药业和众生药业相比，2025年资产负债率谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"以岭药业\", \"众生药业\"], \"year\": 2025, \"indicator\": \"资产负债率\"}"
+  },
+  {
+    "input": "问题：科伦药业和华润双鹤相比，2025年经营性现金流量净额谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"科伦药业\", \"华润双鹤\"], \"year\": 2025, \"indicator\": \"经营性现金流量净额\"}"
+  },
+  {
+    "input": "问题：华东医药和桂林三金相比，2025年存货周转率谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"华东医药\", \"桂林三金\"], \"year\": 2025, \"indicator\": \"存货周转率\"}"
+  },
+  {
+    "input": "问题：九芝堂和太极集团相比，2025年扣非净利润谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"九芝堂\", \"太极集团\"], \"year\": 2025, \"indicator\": \"扣非净利润\"}"
+  },
+  {
+    "input": "问题：香雪制药和千金药业相比，2025年总资产谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"香雪制药\", \"千金药业\"], \"year\": 2025, \"indicator\": \"总资产\"}"
+  },
+  {
+    "input": "问题：对比同仁堂、白云山、云南白药2025年的营业总收入\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"同仁堂\", \"白云山\", \"云南白药\"], \"year\": 2025, \"indicator\": \"营业总收入\"}"
+  },
+  {
+    "input": "问题：对比华润三九、片仔癀、东阿阿胶2025年的净利润\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"华润三九\", \"片仔癀\", \"东阿阿胶\"], \"year\": 2025, \"indicator\": \"净利润\"}"
+  },
+  {
+    "input": "问题：对比广誉远、天士力、康恩贝2025年的研发费用\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"广誉远\", \"天士力\", \"康恩贝\"], \"year\": 2025, \"indicator\": \"研发费用\"}"
+  },
+  {
+    "input": "问题：对比步长制药、以岭药业、众生药业2025年的净资产收益率\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"步长制药\", \"以岭药业\", \"众生药业\"], \"year\": 2025, \"indicator\": \"净资产收益率\"}"
+  },
+  {
+    "input": "问题：对比科伦药业、华润双鹤、华东医药2025年的销售毛利率\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"科伦药业\", \"华润双鹤\", \"华东医药\"], \"year\": 2025, \"indicator\": \"销售毛利率\"}"
+  },
+  {
+    "input": "问题：同仁堂和白云山的净资产收益率差异分析\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"同仁堂\", \"白云山\"], \"indicator\": \"净资产收益率\"}"
+  },
+  {
+    "input": "问题：云南白药和片仔癀的销售毛利率差异分析\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"云南白药\", \"片仔癀\"], \"indicator\": \"销售毛利率\"}"
+  },
+  {
+    "input": "问题：东阿阿胶和广誉远的研发费用差异分析\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"东阿阿胶\", \"广誉远\"], \"indicator\": \"研发费用\"}"
+  },
+  {
+    "input": "问题：天士力和康恩贝的资产负债率差异分析\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"天士力\", \"康恩贝\"], \"indicator\": \"资产负债率\"}"
+  },
+  {
+    "input": "问题：步长制药和以岭药业的经营性现金流量净额差异分析\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"步长制药\", \"以岭药业\"], \"indicator\": \"经营性现金流量净额\"}"
+  },
+  {
+    "input": "问题：哪些公司的业绩比较好\n输出JSON：",
+    "output": "{\"intent\": \"fuzzy_intent\"}"
+  },
+  {
+    "input": "问题：请分析一下中药行业的竞争格局\n输出JSON：",
+    "output": "{\"intent\": \"fuzzy_intent\"}"
+  },
+  {
+    "input": "问题：请分析一下中药行业的整体发展趋势\n输出JSON：",
+    "output": "{\"intent\": \"fuzzy_intent\"}"
+  },
+  {
+    "input": "问题：请分析一下中药行业的研发投入情况\n输出JSON：",
+    "output": "{\"intent\": \"fuzzy_intent\"}"
+  },
+  {
+    "input": "问题：分析同仁堂2025年营业总收入增长的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"同仁堂\", \"year\": 2025, \"indicator\": \"营业总收入\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析华润三九2025年净利润增长的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"华润三九\", \"year\": 2025, \"indicator\": \"净利润\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析白云山2025年净资产收益率变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"白云山\", \"year\": 2025, \"indicator\": \"净资产收益率\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析云南白药2025年销售毛利率变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"云南白药\", \"year\": 2025, \"indicator\": \"销售毛利率\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析片仔癀2025年资产负债率变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"片仔癀\", \"year\": 2025, \"indicator\": \"资产负债率\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析东阿阿胶2025年经营性现金流量净额变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"东阿阿胶\", \"year\": 2025, \"indicator\": \"经营性现金流量净额\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度营业总收入排名前5的公司，并分析它们的财务状况\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\", \"top_k\": 5, \"sub_questions_count\": 3}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度净利润排名前10的公司，并分析它们的发展前景\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润\", \"top_k\": 10, \"sub_questions_count\": 3}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度研发费用最高的公司，并结合研报分析\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"研发费用\", \"needs_rag\": true, \"sub_questions_count\": 3}"
+  },
+  {
+    "input": "问题：结合研报分析，2025年第三季度净资产收益率排名前5的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净资产收益率\", \"top_k\": 5, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：结合行业政策，分析同仁堂2025年的营业总收入情况\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"company\": \"同仁堂\", \"year\": 2025, \"indicator\": \"营业总收入\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：结合研报分析，2025年第三季度销售毛利率排名前10的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售毛利率\", \"top_k\": 10, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：北向资金占A股每天成交金额的15%，影响力不可谓不大，外资集体撤退大A股还顶得住吗\n输出JSON：",
+    "output": "{\"intent\": \"open_question\"}"
+  },
+  {
+    "input": "问题：中药行业的未来发展趋势如何\n输出JSON：",
+    "output": "{\"intent\": \"open_question\"}"
+  },
+  {
+    "input": "问题：中药材价格波动对中药企业有什么影响\n输出JSON：",
+    "output": "{\"intent\": \"open_question\"}"
+  },
+  {
+    "input": "问题：请列出2024年利润最高的top10企业是哪些？这些企业的利润、销售额年同比是多少？年同比上涨幅度最大的是哪家\n输出JSON：",
+    "output": "{\"intent\": \"multi_step\", \"year\": 2024, \"indicator\": \"净利润\", \"top_k\": 10, \"indicators\": [\"净利润\", \"营业总收入\"], \"sub_questions_count\": 3}"
+  },
+  {
+    "input": "问题：请列出2025年第一季度利润最高的top5企业是哪些？这些企业的利润、研发费用是多少？研发费用占比最高的是哪家\n输出JSON：",
+    "output": "{\"intent\": \"multi_step\", \"year\": 2025, \"period\": \"Q1\", \"indicator\": \"净利润\", \"top_k\": 5, \"indicators\": [\"净利润\", \"研发费用\"], \"sub_questions_count\": 3}"
+  },
+  {
+    "input": "问题：康芝药业的营业总收入是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"康芝药业\", \"indicator\": \"营业总收入\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：奇正藏药的净利润是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"奇正藏药\", \"indicator\": \"净利润\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：达仁堂的净资产收益率是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"达仁堂\", \"indicator\": \"净资产收益率\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：康美药业的销售毛利率是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"康美药业\", \"indicator\": \"销售毛利率\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：佐力药业的研发费用是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"佐力药业\", \"indicator\": \"研发费用\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：陇神戎发的资产负债率是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"陇神戎发\", \"indicator\": \"资产负债率\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：新天药业的经营性现金流量净额是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"新天药业\", \"indicator\": \"经营性现金流量净额\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：健民集团的总资产是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"健民集团\", \"indicator\": \"总资产\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：贵州百灵的存货是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"贵州百灵\", \"indicator\": \"存货\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：振东制药的应收账款是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"振东制药\", \"indicator\": \"应收账款\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：金花股份的货币资金是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"金花股份\", \"indicator\": \"货币资金\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：方盛制药的利润总额是多少\n输出JSON：",
+    "output": "{\"intent\": \"basic_query\", \"company\": \"方盛制药\", \"indicator\": \"利润总额\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：康芝药业近三年的营业总收入变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"康芝药业\", \"indicator\": \"营业总收入\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：奇正藏药近三年的净利润变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"奇正藏药\", \"indicator\": \"净利润\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：达仁堂近三年的研发费用变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"达仁堂\", \"indicator\": \"研发费用\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：康美药业近三年的净资产收益率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"康美药业\", \"indicator\": \"净资产收益率\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：佐力药业近三年的销售毛利率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"佐力药业\", \"indicator\": \"销售毛利率\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：陇神戎发近三年的资产负债率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"陇神戎发\", \"indicator\": \"资产负债率\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：新天药业近三年的经营性现金流量净额变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"新天药业\", \"indicator\": \"经营性现金流量净额\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：健民集团近三年的存货周转率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"健民集团\", \"indicator\": \"存货周转率\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：贵州百灵近三年的扣非净利润变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"贵州百灵\", \"indicator\": \"扣非净利润\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：振东制药近三年的总资产变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"振东制药\", \"indicator\": \"总资产\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：金花股份近三年的销售净利率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"金花股份\", \"indicator\": \"销售净利率\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：方盛制药近三年的研发费用占比变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"方盛制药\", \"indicator\": \"研发费用占比\", \"time_range\": \"近三年\"}"
+  },
+  {
+    "input": "问题：康芝药业和奇正藏药相比，2025年营业总收入谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"康芝药业\", \"奇正藏药\"], \"year\": 2025, \"indicator\": \"营业总收入\"}"
+  },
+  {
+    "input": "问题：达仁堂和康美药业相比，2025年净利润谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"达仁堂\", \"康美药业\"], \"year\": 2025, \"indicator\": \"净利润\"}"
+  },
+  {
+    "input": "问题：佐力药业和陇神戎发相比，2025年研发费用谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"佐力药业\", \"陇神戎发\"], \"year\": 2025, \"indicator\": \"研发费用\"}"
+  },
+  {
+    "input": "问题：新天药业和健民集团相比，2025年净资产收益率谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"新天药业\", \"健民集团\"], \"year\": 2025, \"indicator\": \"净资产收益率\"}"
+  },
+  {
+    "input": "问题：贵州百灵和振东制药相比，2025年销售毛利率谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"贵州百灵\", \"振东制药\"], \"year\": 2025, \"indicator\": \"销售毛利率\"}"
+  },
+  {
+    "input": "问题：金花股份和方盛制药相比，2025年资产负债率谁更高\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"金花股份\", \"方盛制药\"], \"year\": 2025, \"indicator\": \"资产负债率\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，存货金额排名前10的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"存货\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：2025年第三季度，应收账款金额排名前5的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"应收账款\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第三季度，货币资金金额排名前10的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"货币资金\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：2025年第三季度，短期借款金额排名前5的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"短期借款\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第三季度，利润总额金额排名前10的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"利润总额\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：2025年第三季度，营业总成本金额排名前5的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总成本\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第三季度，营业总收入同比增长率排名前10的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入同比增长率\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：2025年第三季度，净利润同比增长率排名前5的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润同比增长率\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第三季度，总资产同比增长率排名前10的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"总资产同比增长率\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：2025年第三季度，加权平均净资产收益率排名前5的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"加权平均净资产收益率\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第三季度，销售费用率最低的10家公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售费用率\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：2025年第三季度，扣非净利润最低的5家公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"扣非净利润\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第三季度，总资产最低的10家公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"总资产\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：2025年第三季度，总负债最低的5家公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"总负债\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第三季度，所有者权益总额最低的10家公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"所有者权益总额\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：2025年第三季度，投资性现金流净额最高的5家公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"投资性现金流净额\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第三季度，销售费用最高的10家公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售费用\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：2025年第三季度，销售净利率最低的5家公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售净利率\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第三季度，研发费用占比最低的10家公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"研发费用占比\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：2025年第三季度，存货周转率最低的5家公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"存货周转率\", \"top_k\": 5}"
+  },
+  {
+    "input": "问题：2025年第三季度，营业总收入低于10亿的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\", \"condition\": {\"type\": \"<\", \"value\": \"10亿\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，净利润低于1亿的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润\", \"condition\": {\"type\": \"<\", \"value\": \"1亿\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，研发费用低于5000万的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"研发费用\", \"condition\": {\"type\": \"<\", \"value\": \"5000万\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，资产负债率低于30%的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"资产负债率\", \"condition\": {\"type\": \"<\", \"value\": \"30%\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，销售净利率低于5%的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售净利率\", \"condition\": {\"type\": \"<\", \"value\": \"5%\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，研发费用占比低于2%的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"研发费用占比\", \"condition\": {\"type\": \"<\", \"value\": \"2%\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，经营性现金流量净额为负的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"经营性现金流量净额\", \"condition\": {\"type\": \"<\", \"value\": 0}}"
+  },
+  {
+    "input": "问题：2025年第三季度，净利润为正的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润\", \"condition\": {\"type\": \">\", \"value\": 0}}"
+  },
+  {
+    "input": "问题：2025年第三季度，销售费用率高于15%的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售费用率\", \"condition\": {\"type\": \">\", \"value\": \"15%\"}}"
+  },
+  {
+    "input": "问题：2025年第三季度，营业总收入在10亿到50亿之间的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，净利润在1亿到5亿之间的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，研发费用在5000万到2亿之间的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"研发费用\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，资产负债率在30%到60%之间的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"资产负债率\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，销售净利率在5%到15%之间的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售净利率\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，研发费用占比在2%到5%之间的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"研发费用占比\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，存货周转率最低的公司是哪一家\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"存货周转率\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，扣非净利润最低的公司是哪一家\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"扣非净利润\"}"
+  },
+  {
+    "input": "问题：2025年第三季度，总资产最低的公司是哪一家\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"总资产\"}"
+  },
+  {
+    "input": "问题：统计2025年第三季度所有公司的存货情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"存货\"}"
+  },
+  {
+    "input": "问题：统计2025年第三季度所有公司的应收账款情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"应收账款\"}"
+  },
+  {
+    "input": "问题：统计2025年第三季度所有公司的货币资金情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"货币资金\"}"
+  },
+  {
+    "input": "问题：统计2025年第三季度所有公司的短期借款情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"短期借款\"}"
+  },
+  {
+    "input": "问题：统计2025年第三季度所有公司的利润总额情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"利润总额\"}"
+  },
+  {
+    "input": "问题：统计2025年第三季度所有公司的营业总成本情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总成本\"}"
+  },
+  {
+    "input": "问题：统计2025年第三季度所有公司的营业总收入同比增长率情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"营业总收入同比增长率\"}"
+  },
+  {
+    "input": "问题：统计2025年第三季度所有公司的净利润同比增长率情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净利润同比增长率\"}"
+  },
+  {
+    "input": "问题：统计2025年第三季度所有公司的总资产同比增长率情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"总资产同比增长率\"}"
+  },
+  {
+    "input": "问题：统计2025年第三季度所有公司的加权平均净资产收益率情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"加权平均净资产收益率\"}"
+  },
+  {
+    "input": "问题：分析康芝药业2025年营业总收入变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"康芝药业\", \"year\": 2025, \"indicator\": \"营业总收入\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析奇正藏药2025年净利润变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"奇正藏药\", \"year\": 2025, \"indicator\": \"净利润\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析达仁堂2025年净资产收益率变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"达仁堂\", \"year\": 2025, \"indicator\": \"净资产收益率\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析康美药业2025年销售毛利率变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"康美药业\", \"year\": 2025, \"indicator\": \"销售毛利率\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析佐力药业2025年资产负债率变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"佐力药业\", \"year\": 2025, \"indicator\": \"资产负债率\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析陇神戎发2025年经营性现金流量净额变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"陇神戎发\", \"year\": 2025, \"indicator\": \"经营性现金流量净额\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析新天药业2025年存货周转率变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"新天药业\", \"year\": 2025, \"indicator\": \"存货周转率\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析健民集团2025年扣非净利润变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"健民集团\", \"year\": 2025, \"indicator\": \"扣非净利润\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析贵州百灵2025年总资产变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"贵州百灵\", \"year\": 2025, \"indicator\": \"总资产\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析振东制药2025年销售净利率变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"振东制药\", \"year\": 2025, \"indicator\": \"销售净利率\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析金花股份2025年研发费用占比变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"金花股份\", \"year\": 2025, \"indicator\": \"研发费用占比\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：分析方盛制药2025年销售费用率变化的原因\n输出JSON：",
+    "output": "{\"intent\": \"analysis_query\", \"company\": \"方盛制药\", \"year\": 2025, \"indicator\": \"销售费用率\", \"needs_reasoning\": true}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度净资产收益率排名前5的公司，并分析它们的财务状况\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"净资产收益率\", \"top_k\": 5, \"sub_questions_count\": 3}"
+  },
+  {
+    "input": "问题：请列出2025年第三季度销售毛利率排名前10的公司，并分析它们的发展前景\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售毛利率\", \"top_k\": 10, \"sub_questions_count\": 3}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度资产负债率最低的公司，并结合研报分析\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"资产负债率\", \"needs_rag\": true, \"sub_questions_count\": 3}"
+  },
+  {
+    "input": "问题：请分析2025年第三季度经营性现金流量净额最高的公司，并结合研报分析\n输出JSON：",
+    "output": "{\"intent\": \"multi_intent\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"经营性现金流量净额\", \"needs_rag\": true, \"sub_questions_count\": 3}"
+  },
+  {
+    "input": "问题：结合研报分析，2025年第三季度销售净利率排名前5的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"销售净利率\", \"top_k\": 5, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：结合行业政策，分析白云山2025年的净利润情况\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"company\": \"白云山\", \"year\": 2025, \"indicator\": \"净利润\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：结合研报分析，2025年第三季度资产负债率排名前10的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"资产负债率\", \"top_k\": 10, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：结合研报分析，2025年第三季度经营性现金流量净额排名前5的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"经营性现金流量净额\", \"top_k\": 5, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：结合行业政策，分析片仔癀2025年的净资产收益率情况\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"company\": \"片仔癀\", \"year\": 2025, \"indicator\": \"净资产收益率\", \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：结合研报分析，2025年第三季度存货周转率排名前10的公司有哪些\n输出JSON：",
+    "output": "{\"intent\": \"fusion_query\", \"year\": 2025, \"period\": \"Q3\", \"indicator\": \"存货周转率\", \"top_k\": 10, \"needs_rag\": true}"
+  },
+  {
+    "input": "问题：康芝药业2022-2025年的营业总收入变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"康芝药业\", \"indicator\": \"营业总收入\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：奇正藏药2022-2025年的净利润变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"奇正藏药\", \"indicator\": \"净利润\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：达仁堂2022-2025年的研发费用变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"达仁堂\", \"indicator\": \"研发费用\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：康美药业2022-2025年的净资产收益率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"康美药业\", \"indicator\": \"净资产收益率\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：佐力药业2022-2025年的销售毛利率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"佐力药业\", \"indicator\": \"销售毛利率\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：陇神戎发2022-2025年的资产负债率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"陇神戎发\", \"indicator\": \"资产负债率\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：新天药业2022-2025年的经营性现金流量净额变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"新天药业\", \"indicator\": \"经营性现金流量净额\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：健民集团2022-2025年的存货周转率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"健民集团\", \"indicator\": \"存货周转率\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：贵州百灵2022-2025年的扣非净利润变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"贵州百灵\", \"indicator\": \"扣非净利润\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：振东制药2022-2025年的总资产变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"振东制药\", \"indicator\": \"总资产\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：金花股份2022-2025年的销售净利率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"金花股份\", \"indicator\": \"销售净利率\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：方盛制药2022-2025年的研发费用占比变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"方盛制药\", \"indicator\": \"研发费用占比\", \"time_range\": \"2022-2025年\"}"
+  },
+  {
+    "input": "问题：康芝药业近五年的营业总收入变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"康芝药业\", \"indicator\": \"营业总收入\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：奇正藏药近五年的净利润变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"奇正藏药\", \"indicator\": \"净利润\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：达仁堂近五年的研发费用变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"达仁堂\", \"indicator\": \"研发费用\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：康美药业近五年的净资产收益率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"康美药业\", \"indicator\": \"净资产收益率\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：佐力药业近五年的销售毛利率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"佐力药业\", \"indicator\": \"销售毛利率\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：陇神戎发近五年的资产负债率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"陇神戎发\", \"indicator\": \"资产负债率\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：新天药业近五年的经营性现金流量净额变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"新天药业\", \"indicator\": \"经营性现金流量净额\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：健民集团近五年的存货周转率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"健民集团\", \"indicator\": \"存货周转率\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：贵州百灵近五年的扣非净利润变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"贵州百灵\", \"indicator\": \"扣非净利润\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：振东制药近五年的总资产变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"振东制药\", \"indicator\": \"总资产\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：金花股份近五年的销售净利率变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"金花股份\", \"indicator\": \"销售净利率\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：方盛制药近五年的研发费用占比变化趋势\n输出JSON：",
+    "output": "{\"intent\": \"time_trend\", \"company\": \"方盛制药\", \"indicator\": \"研发费用占比\", \"time_range\": \"近五年\"}"
+  },
+  {
+    "input": "问题：对比康芝药业、奇正藏药、达仁堂2025年的营业总收入\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"康芝药业\", \"奇正藏药\", \"达仁堂\"], \"year\": 2025, \"indicator\": \"营业总收入\"}"
+  },
+  {
+    "input": "问题：对比康美药业、佐力药业、陇神戎发2025年的净利润\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"康美药业\", \"佐力药业\", \"陇神戎发\"], \"year\": 2025, \"indicator\": \"净利润\"}"
+  },
+  {
+    "input": "问题：对比新天药业、健民集团、贵州百灵2025年的研发费用\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"新天药业\", \"健民集团\", \"贵州百灵\"], \"year\": 2025, \"indicator\": \"研发费用\"}"
+  },
+  {
+    "input": "问题：对比振东制药、金花股份、方盛制药2025年的净资产收益率\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"振东制药\", \"金花股份\", \"方盛制药\"], \"year\": 2025, \"indicator\": \"净资产收益率\"}"
+  },
+  {
+    "input": "问题：对比康芝药业和奇正藏药的销售毛利率差异分析\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"康芝药业\", \"奇正藏药\"], \"indicator\": \"销售毛利率\"}"
+  },
+  {
+    "input": "问题：对比达仁堂和康美药业的资产负债率差异分析\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"达仁堂\", \"康美药业\"], \"indicator\": \"资产负债率\"}"
+  },
+  {
+    "input": "问题：对比佐力药业和陇神戎发的经营性现金流量净额差异分析\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"佐力药业\", \"陇神戎发\"], \"indicator\": \"经营性现金流量净额\"}"
+  },
+  {
+    "input": "问题：对比新天药业和健民集团的存货周转率差异分析\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"新天药业\", \"健民集团\"], \"indicator\": \"存货周转率\"}"
+  },
+  {
+    "input": "问题：对比贵州百灵和振东制药的扣非净利润差异分析\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"贵州百灵\", \"振东制药\"], \"indicator\": \"扣非净利润\"}"
+  },
+  {
+    "input": "问题：对比金花股份和方盛制药的总资产差异分析\n输出JSON：",
+    "output": "{\"intent\": \"comparison\", \"companies\": [\"金花股份\", \"方盛制药\"], \"indicator\": \"总资产\"}"
+  },
+  {
+    "input": "问题：2022年各中药企业研发情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2022, \"indicator\": \"研发费用\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：2023年中药公司的研发费用\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2023, \"indicator\": \"研发费用\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：2024年各中药企业研发投入多少\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2024, \"indicator\": \"研发费用\", \"period\": \"FY\"}"
+  },
+  {
+    "input": "问题：2024年中药行业的研发开支排名\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2024, \"indicator\": \"研发费用\", \"period\": \"FY\", \"top_k\": 10}"
+  },
+  {
+    "input": "问题：2025年各中药企业研发情况\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"indicator\": \"研发费用\", \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：2025年中药公司的研发费用\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"indicator\": \"研发费用\", \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：各中药企业2025年研发投入多少\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"indicator\": \"研发费用\", \"period\": \"Q3\"}"
+  },
+  {
+    "input": "问题：2025年中药行业的研发开支排名\n输出JSON：",
+    "output": "{\"intent\": \"stat_query\", \"year\": 2025, \"indicator\": \"研发费用\", \"period\": \"Q3\", \"top_k\": 10}"
+  }
+]

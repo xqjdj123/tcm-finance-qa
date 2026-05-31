@@ -1,0 +1,4 @@
+sentence-transformers>=2.2.0
+torch>=1.10.0
+transformers>=4.30.0
+datasets>=2.10.0
