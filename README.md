@@ -96,15 +96,58 @@ python app.py
 
 ---
 
-## 📓 开发日记（Git Commit 记录）
+## 📓 开发札记
 
-| 提交 | 内容 |
-|------|------|
-| 📝 Day 1 | 项目初始状态：Agent框架、PDF提取管线、RAG检索、模型骨架。如实记录各模块完成度(完整可用/骨架就绪/有隐患) |
-| 📝 Day 2 | 对话连续性升级：新增 FollowupResolver 追问解析器独立类，session 精简为4个getter，agent追问逻辑集中管理 |
+### Day 1：项目骨架搭建
 
-*每次开发完执行 \git add .\ + \git commit -m "📝 Day X: ..."\ + \git push\ 继续记录*
+完成了最核心的几块基础设施：
+
+**Agent 引擎（完整可用）**
+- ReAct 风格的多步推理 Agent，支持 7 类任务分类（query/analysis/risk/report/compare/trend/chart）
+- 6 个工具全部就绪：SQL查询、RAG研报搜索、数据处理、图表生成、风险预警、报告生成
+- 其中 risk_tool 实现了 6 条财务风险检测规则（负债率/现金流/应收账款/库存/盈利下滑/ROE）
+- report_tool 能生成六段式完整财务分析报告
+
+**PDF 财报提取管线（完整可用）**
+- 14 个模块组成完整 pipeline，支持上交所 + 深交所两种财报格式
+- 字段映射 + 数值归一化（一亿八千万→180000000）+ LLM 回退兜底
+- 已导入 MySQL 2667 行数据（4 张表）
+
+**RAG 研报检索（完整可用）**
+- rag_module.py（21KB）实现了 FAISS + BM25 双路检索 + RRF 融合排序 + Reranker
+- 从研报 MD 建立向量索引，支持按公司/年份预过滤
+
+**模型模块（骨架就绪，权重需本地训练）**
+- model2/pipeline.py（16KB）整合了 NER → Model2 → time_parser → schema_mapping → SQL 生成
+- inference_model2.py 已 finetune 但 checkpoint 权重未上传，会 fallback 到 bart-base-chinese
+- ner_model 同理，路径不存在时跳过
+
+> **踩坑**：session.py 是空文件 0 字节，之前完全没发现。
+> run_app.py 通过 .pyc 字节码加载，是个 workaround。
+> 数据库密码 root/433127hj 直接硬编码在代码里了。
 
 ---
 
-MIT License
+### Day 2：对话连续性升级
+
+解决了最影响体验的问题：**追问断连**。
+
+**问题**：用户问完片仔癀净利润是多少，再问那营收呢，系统会回答请提供公司名称——体验很差。
+
+**方案**：不搞复杂 Memory，只保留 5 个核心槽位（company/indicator/period/task_type/last_result），追问时自动继承上一轮。
+
+**实现**：
+- 新增 FollowupResolver 独立类，统一处理 6 种追问类型（chart/report/rank/indicator/analysis/normal）
+- session.py 砍掉了原来分散的 is_followup() 和 merge_question()，改为 4 个干净 getter
+- agent.py 的 _handle_followup() 从 80 行精简到 30 行
+
+**示例**：
+- 那营收呢 → 继承 company=片仔癀，只换 indicator
+- 为什么增长这么快 → 自动触发 sql_query → rag_search 分析链路
+- 画图 → 用上一轮数据直接生成图表
+
+> **心得**：这个改动其实不大，但对用户感知提升最明显。会很多功能和真的像一个财务分析助手的差别就在这里。
+
+---
+
+*每次开发完执行 \git add .\ + \git commit -m "📝 Day X: 改动说明"\ + \git push\ 继续记录*
