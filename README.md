@@ -150,4 +150,24 @@ python app.py
 
 ---
 
+### Day 3：单位检测全链路可追溯 + 数据清洗
+
+终于把单位这个老大难问题彻底解决了。
+
+**问题**：PDF 提取时 detect_unit() 没找到单位声明就用默认值 1（元），但 PDF 实际用的是万元，导致数值差 10000 倍。异常数据混在库里，没人知道哪些是错的。
+
+**方案**：全链路可追溯。
+
+- value_normalizer 的 detect_unit_above() 从返回一个数字改为返回（倍率, 单位名, 原文出处）
+- 单位信息从 table_extractor 贯穿到 JSON，再到数据库
+- import_db 重构为 DataImporter 类，集成 pending_review 自动检测机制
+- 数值 > 1 亿且单位声明为元时，自动写入 pending_review 表等待人工审核
+- 支持 --review 参数交互式审核
+
+**结果**：异常数据从 722 条降为 0，全部审核完成，四张表单位统一为万元。
+
+> 踩坑：一开始以为 normalize() 写错了，查了两天才发现是 detect_unit() 没扫到页脚的声明。pdfplumber 提取的文本不完整，页眉页脚经常被截断。
+
+---
+
 *每次开发完执行 \git add .\ + \git commit -m "📝 Day X: 改动说明"\ + \git push\ 继续记录*
