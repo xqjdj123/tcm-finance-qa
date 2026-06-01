@@ -91,9 +91,10 @@ def _has_section_boundary(text_a, text_b):
 def detect_unit_above(main_text, above_texts, below_texts=None, global_unit_factor=None):
     """扫描单位声明（优先本页，再上下页，最后全局兜底）
 
-    关键改进：
-    1. 本页声明优先（即使单位是元，也以本页为准，不被其他页的万元污染）
-    2. 向上扫描时检查section边界，避免跨section的单位污染
+    返回: (unit_factor, unit_raw, unit_source_text)
+    - unit_factor: 单位倍率
+    - unit_raw: 原始单位名称（如"万元"、"元"）
+    - unit_source_text: 单位声明原文
     """
     # 先查本页（在section边界之前的部分）
     boundary_pos = len(main_text)
@@ -102,45 +103,78 @@ def detect_unit_above(main_text, above_texts, below_texts=None, global_unit_fact
         if pos != -1 and pos < boundary_pos:
             boundary_pos = pos
     text_before_boundary = main_text[:boundary_pos]
-    uf, found = detect_unit(text_before_boundary)
-    if found: return uf  # 本页有声明就直接用，不管是不是元
+    uf, found, source_text = detect_unit_with_source(text_before_boundary)
+    if found: return uf, _get_unit_name(uf), source_text
 
     # 也检查全文
-    uf, found = detect_unit(main_text)
-    if found: return uf
+    uf, found, source_text = detect_unit_with_source(main_text)
+    if found: return uf, _get_unit_name(uf), source_text
 
     # 向上扫描（最多5页，遇到section边界停止）
     for page_text, page_idx in above_texts[:5]:
-        # 检查这页是否包含section边界（说明进入了不同的章节）
         has_boundary = any(m in page_text for m in SECTION_BOUNDARIES)
         if has_boundary:
-            # 这页属于另一个section，检查该页自己的单位，然后停止
-            uf, found = detect_unit(page_text)
+            uf, found, source_text = detect_unit_with_source(page_text)
             if found:
-                return uf
-            break  # 跨section了，不再继续向上
-        uf, found = detect_unit(page_text)
+                return uf, _get_unit_name(uf), source_text
+            break
+        uf, found, source_text = detect_unit_with_source(page_text)
         if found:
-            return uf
+            return uf, _get_unit_name(uf), source_text
 
-    # 向下扫描（最多3页，有些PDF单位声明在表下方）
+    # 向下扫描（最多3页）
     if below_texts:
         for page_text, page_idx in below_texts[:3]:
             has_boundary = any(m in page_text for m in SECTION_BOUNDARIES)
             if has_boundary:
-                uf, found = detect_unit(page_text)
+                uf, found, source_text = detect_unit_with_source(page_text)
                 if found:
-                    return uf
+                    return uf, _get_unit_name(uf), source_text
                 break
-            uf, found = detect_unit(page_text)
+            uf, found, source_text = detect_unit_with_source(page_text)
             if found:
-                return uf
+                return uf, _get_unit_name(uf), source_text
 
     # 全局兜底
     if global_unit_factor and global_unit_factor != 1:
-        return global_unit_factor
+        return global_unit_factor, _get_unit_name(global_unit_factor), "global_fallback"
 
-    return 1
+    return 1, "元", "default"
+
+
+def detect_unit_with_source(text):
+    """从文本中检测单位声明，返回 (倍率因子, 是否找到声明, 声明原文)"""
+    if not text: return (1, False, "")
+
+    for pat, factor in UNIT_PATTERNS:
+        match = re.search(pat, text)
+        if match:
+            if factor is None:
+                for pat2, factor2 in UNIT_IN_TEXT:
+                    match2 = re.search(pat2, text)
+                    if match2: return (factor2, True, match2.group(0))
+                return (1, True, match.group(0))
+            return (factor, True, match.group(0))
+
+    for pat2, factor2 in UNIT_IN_TEXT:
+        match = re.search(pat2, text)
+        if match: return (factor2, True, match.group(0))
+
+    return (1, False, "")
+
+
+def _get_unit_name(factor):
+    """根据倍率因子返回单位名称"""
+    if factor == 1:
+        return "元"
+    elif factor == 1000:
+        return "千元"
+    elif factor == 10000:
+        return "万元"
+    elif factor == 100000000:
+        return "亿元"
+    else:
+        return "未知"
 
 
 def parse_number(raw):

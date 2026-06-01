@@ -375,7 +375,7 @@ def extract_all_tables(pdf_path, max_pages=50):
                 pt = pdf.pages[pi].extract_text() or ""
                 if pt.strip(): below_texts.append((pt, pi))
             page_text = pdf.pages[page_idx].extract_text() or ""
-            unit_factor = detect_unit_above(page_text, above_texts, below_texts, global_unit_factor)
+            unit_factor, unit_raw, unit_source_text = detect_unit_above(page_text, above_texts, below_texts, global_unit_factor)
 
             result[tt] = {
                 "score": 100,  # 分块提取的置信度设为100
@@ -383,6 +383,8 @@ def extract_all_tables(pdf_path, max_pages=50):
                 "page_text": page_text,
                 "matrix": matrix_data,
                 "unit_factor": unit_factor,
+                "unit_raw": unit_raw,
+                "unit_source_text": unit_source_text,
                 "scores_breakdown": {"method": "section_based"},
                 "source_type": "statement",
             }
@@ -392,7 +394,7 @@ def extract_all_tables(pdf_path, max_pages=50):
     if missing:
         best = {}
         for tt in missing:
-            best[tt] = {"score":0,"page":-1,"page_text":"","matrix":None,"unit_factor":1,"scores_breakdown":{},"source_type":"statement"}
+            best[tt] = {"score":0,"page":-1,"page_text":"","matrix":None,"unit_factor":1,"unit_raw":"元","unit_source_text":"","scores_breakdown":{},"source_type":"statement"}
 
         for page_idx in range(n_pages):
             page = pdf.pages[page_idx]
@@ -428,7 +430,10 @@ def extract_all_tables(pdf_path, max_pages=50):
                         for pi in range(page_idx+1, min(page_idx+4, n_pages)):
                             pt = pdf.pages[pi].extract_text() or ""
                             if pt.strip(): below_texts.append((pt, pi))
-                        bp["unit_factor"] = detect_unit_above(page_text, above_texts, below_texts, global_unit_factor)
+                        unit_factor, unit_raw, unit_source_text = detect_unit_above(page_text, above_texts, below_texts, global_unit_factor)
+                        bp["unit_factor"] = unit_factor
+                        bp["unit_raw"] = unit_raw
+                        bp["unit_source_text"] = unit_source_text
 
             if not still_searching: break
 

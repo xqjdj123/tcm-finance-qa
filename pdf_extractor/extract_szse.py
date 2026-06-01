@@ -122,12 +122,25 @@ for idx, p in enumerate(pdfs):
             if not r["passed"]:
                 print("    XX %s: %s" % (r["check"], r["detail"]))
 
+    # 收集单位信息
+    unit_info = {}
+    if all_tables:
+        for tt in TBL_ORDER:
+            res = all_tables.get(tt)
+            if res:
+                unit_info[tt] = {
+                    "unit_factor": res.get("unit_factor", 1),
+                    "unit_raw": res.get("unit_raw", "元"),
+                    "unit_source_text": res.get("unit_source_text", ""),
+                }
+
     safe_name = name.replace("/","_").replace(":","").replace(chr(65281),"") if name else sc
     fname = "%s_%s%s_%s.json" % (safe_name, yr, rp, p["type"])
     json.dump({"stock_code":sc,"stock_abbr":name or sc,"report_year":yr,
         "report_period":rp,"report_type":p["type"],"exchange":"SZSE",
         "source":source,"confidence":80,
         "validation":{"pass":v_pass,"total":v_total,"score":v_score,"details":v_results},
+        "unit_info":unit_info,
         "data":merged_data},
         open(os.path.join(OUT,fname),"w",encoding="utf-8"),ensure_ascii=False,indent=2)
     ok += 1
