@@ -78,9 +78,8 @@ class RiskTool(BaseTool):
         """查询公司数据，支持指定年份/报告期"""
         queries = [
             ("income_sheet", "stock_abbr, report_year, report_period, net_profit, total_operating_revenue, operating_expense_cost_of_sales"),
-            ("balance_sheet", "stock_abbr, report_year, report_period, asset_total_assets, liability_total_liabilities, asset_accounts_receivable, asset_inventory"),
+            ("balance_sheet", "stock_abbr, report_year, report_period, asset_total_assets, liability_total_liabilities, asset_accounts_receivable, asset_inventory, equity_total_equity"),
             ("cash_flow_sheet", "stock_abbr, report_year, report_period, operating_cf_net_amount"),
-            ("core_performance_indicators_sheet", "stock_abbr, report_year, report_period, roe_weighted_excl_non_recurring, gross_profit_margin"),
         ]
 
         all_rows = []
@@ -245,16 +244,19 @@ class RiskTool(BaseTool):
         return alerts
 
     def _rule_roe(self, data):
-        """规则6：ROE风险 — ROE < 5%"""
+        """规则6：ROE风险 — 使用净利润/净资产计算ROE"""
         alerts = []
         for row in data:
-            roe = self._f(row.get("roe_weighted_excl_non_recurring"))
-            if roe is not None and roe < 0.05 and roe > -1:  # 排除异常值
-                alerts.append({
-                    "type": "ROE风险", "rule": "ROE<5%", "severity": "低",
-                    "detail": "%s %s%s ROE=%.2f%%" % (row["stock_abbr"], row["report_year"], row["report_period"], roe * 100),
-                    "suggestion": "股东回报能力较弱",
-                })
+            np_val = self._f(row.get("net_profit"))
+            equity = self._f(row.get("equity_total_equity"))
+            if np_val is not None and equity is not None and equity > 0:
+                roe = np_val / equity
+                if roe < 0.05 and roe > -1:  # 排除异常值
+                    alerts.append({
+                        "type": "ROE风险", "rule": "ROE<5%", "severity": "低",
+                        "detail": "%s %s%s ROE=%.2f%%" % (row["stock_abbr"], row["report_year"], row["report_period"], roe * 100),
+                        "suggestion": "股东回报能力较弱",
+                    })
         return alerts
 
     # ==================== 工具方法 ====================

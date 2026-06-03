@@ -11,7 +11,7 @@ venv/
 # ================================
 # 开发调试脚本（_开头 = 一次性脚本）
 # ================================
-_check_*.py
+_check*.py
 _fix*.py
 _fix*.b64
 _read_*.py
@@ -85,6 +85,32 @@ models/model1_schema_linking/output/README.md
 # 第三方依赖库
 # ================================
 pdf_extractor/lib/
+
+
+# ================================
+# 一次性调试脚本（无下划线前缀）
+# ================================
+check_*.py
+test_*.py
+verify_*.py
+debug_*.py
+reimport*.py
+analyze_failures*.py
+read_excel*.py
+fix_*.py
+run*batch*.py
+batch_process.py
+compare_data.py
+cleanup_tables.py
+create_core_table.py
+drop_tables.py
+patch_agent.py
+review_pending.py
+h
+results/
+backup_*.json
+data/schema_columns.json
+data/mapping_history.json
 
 # ================================
 # 系统 / 环境

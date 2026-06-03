@@ -119,8 +119,25 @@ def build_report_html(report_md):
 
 # ===== 核心处理 =====
 def process_question(question, session_id="default"):
-    agent = get_agent()
-    result = agent.query(question, session_id=session_id)
+    try:
+        agent = get_agent()
+        result = agent.query(question, session_id=session_id)
+    except Exception as e:
+        import traceback
+        print(f"[ERROR] process_question failed: {e}")
+        traceback.print_exc()
+        return {
+            "question": question,
+            "task_type": "error",
+            "intent": "error",
+            "plan": "",
+            "confidence": 0,
+            "answer": f"处理失败: {str(e)}",
+            "display_html": "",
+            "rag_html_raw": None,
+            "chart": None,
+            "result_count": 0,
+        }
 
     answer = result.get("answer", "")
     task_type = result.get("task_type", "")
@@ -191,6 +208,65 @@ def query():
     # 用客户端IP作为session_id，保持同一用户的对话上下文
     session_id = request.remote_addr or "default"
     return jsonify(process_question(q, session_id=session_id))
+
+
+@app.route("/api/debug", methods=["POST"])
+def debug_query():
+    """诊断端点：逐步追踪查询链路"""
+    d = request.get_json()
+    q = d.get("question", "").strip()
+    if not q:
+        return jsonify({"error": "empty"}), 400
+    import json as _json
+    steps = {}
+    try:
+        agent = get_agent()
+        pipeline = agent._get_pipeline()
+
+        # Step 1: understand
+        try:
+            und = pipeline.understand(q)
+            steps["understand"] = und
+        except Exception as e:
+            steps["understand_error"] = str(e)
+
+        # Step 2: field_matcher
+        try:
+            sys.path.insert(0, os.path.join(BASE_DIR, "models", "model2_question_understanding"))
+            from field_matcher import match as fm
+            indicators = steps.get("understand", {}).get("indicators", [])
+            steps["field_matcher_results"] = {}
+            for ind in indicators:
+                r = fm(ind)
+                steps["field_matcher_results"][ind] = _json.loads(_json.dumps(r, default=str)) if r else None
+        except Exception as e:
+            steps["field_matcher_error"] = str(e)
+
+        # Step 3: pipeline.query
+        try:
+            result = pipeline.query(q)
+            steps["pipeline_query"] = {
+                "success": result.get("success"),
+                "answer": result.get("answer"),
+                "reason": result.get("reason"),
+                "data_count": len(result.get("data") or []),
+                "data_sample": _json.loads(_json.dumps((result.get("data") or [])[:3], default=str)),
+            }
+        except Exception as e:
+            steps["pipeline_query_error"] = str(e)
+
+        # Step 4: Agent._build_sql_inputs
+        try:
+            und = steps.get("understand", {})
+            inputs = agent._build_sql_inputs(q, und)
+            steps["sql_inputs"] = inputs
+        except Exception as e:
+            steps["sql_inputs_error"] = str(e)
+
+    except Exception as e:
+        steps["top_level_error"] = str(e)
+
+    return jsonify(steps)
 
 @app.route("/api/reset", methods=["POST"])
 def reset():

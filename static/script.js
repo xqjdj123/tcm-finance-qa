@@ -147,16 +147,16 @@ function buildAnswerHtml(data) {
         html += '</div>';
     }
 
-    // 渲染答案：报告/风险用Markdown，其他用HTML
+    // 统一用Markdown渲染答案（处理**加粗**等标记）
     var answer = data.answer || data.display_html || (data.has_rag ? '' : '无结果');
-    if (intent === 'report' || intent === 'risk' || intent === 'analysis') {
-        html += '<div class="report-content">' + renderMarkdown(answer) + '</div>';
-    } else {
-        html += answer;
-    }
 
     if (data.chart) {
         html += '<div class="chart-img"><img src="data:image/png;base64,' + data.chart + '" onclick="this.classList.toggle(\'expanded\')"></div>';
+    }
+
+    // 答案文字（图表之后展示）
+    if (answer && answer !== '无结果') {
+        html += '<div class="answer-text">' + renderMarkdown(answer) + '</div>';
     }
 
     var conf = data.confidence || 0;
@@ -254,3 +254,4 @@ document.querySelector('.nav-right').addEventListener('click', function(e) {
 });
 
 input.focus();
+

@@ -82,7 +82,6 @@ class ReportTool(BaseTool):
             ("income_sheet", "stock_abbr, report_year, report_period, total_operating_revenue, net_profit, operating_expense_cost_of_sales, total_operating_expenses"),
             ("balance_sheet", "stock_abbr, report_year, report_period, asset_total_assets, liability_total_liabilities, equity_total_equity, asset_accounts_receivable, asset_inventory, liability_short_term_loans, asset_cash_and_cash_equivalents"),
             ("cash_flow_sheet", "stock_abbr, report_year, report_period, operating_cf_net_amount, investing_cf_net_amount, financing_cf_net_amount"),
-            ("core_performance_indicators_sheet", "stock_abbr, report_year, report_period, roe_weighted_excl_non_recurring, gross_profit_margin, net_profit_margin, eps"),
         ]
 
         all_rows = []
@@ -118,15 +117,36 @@ class ReportTool(BaseTool):
         metrics["总资产"] = self._f(row.get("asset_total_assets"))
         metrics["总负债"] = self._f(row.get("liability_total_liabilities"))
 
-        # 盈利能力
-        metrics["毛利率"] = self._f(row.get("gross_profit_margin"))
-        metrics["净利率"] = self._f(row.get("net_profit_margin"))
-        metrics["ROE"] = self._f(row.get("roe_weighted_excl_non_recurring"))
-        metrics["EPS"] = self._f(row.get("eps"))
+        # 盈利能力 - 需要计算
+        revenue = metrics["营业收入"]
+        cost = self._f(row.get("operating_expense_cost_of_sales"))
+        np_val = metrics["净利润"]
+        equity = self._f(row.get("equity_total_equity"))
+
+        # 毛利率 = (营业收入 - 营业成本) / 营收
+        if revenue and cost and revenue > 0:
+            metrics["毛利率"] = (revenue - cost) / revenue
+        else:
+            metrics["毛利率"] = None
+
+        # 净利率 = 净利润 / 营收
+        if np_val and revenue and revenue > 0:
+            metrics["净利率"] = np_val / revenue
+        else:
+            metrics["净利率"] = None
+
+        # ROE = 净利润 / 净资产
+        if np_val and equity and equity > 0:
+            metrics["ROE"] = np_val / equity
+        else:
+            metrics["ROE"] = None
+
+        # EPS 暂时无法计算（需要总股本数据）
+        metrics["EPS"] = None
 
         # 偿债能力
-        a = self._f(row.get("asset_total_assets"))
-        l = self._f(row.get("liability_total_liabilities"))
+        a = metrics["总资产"]
+        l = metrics["总负债"]
         if a and l and a > 0:
             metrics["资产负债率"] = l / a
         else:

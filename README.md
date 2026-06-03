@@ -170,4 +170,70 @@ python app.py
 
 ---
 
+
+### Day 4: Agent架构重写 + KG Resolver + sql_tool重构 + 代码清理
+
+Day 3做完单位清洗后，发现了一个更大的结构问题。
+
+**问题**: 系统功能越来越多，但Agent核心还是最初的ReAct风格。pipeline理解完意图后，Agent不信任，自己又做一遍分类，两套逻辑经常打架。sql_tool也不信任上游，自己做字段匹配而且只认三个主表。最直接的后果: 盈利能力对比查询返回空了N次，debug了两天才追到根因。
+
+**Agent层改动(重写)**:
+- 删除了TaskType枚举、SYSTEM_PROMPT、_classify()、_check_slots()、_planner()，旧ReAct骨架全部砍掉
+- 删除了原来的_run_agent_loop()多轮LLM调用，改为_execute_plan()确定性执行
+- agent.query()简化为: 追问检测 -> 多意图拆分 -> 单意图执行 -> 结果合并
+- INTENT_PLANS硬编码6种计划，不再由LLM规划
+
+**KG Resolver(新增)**:
+- 250+同义词映射: 税后利润->净利润、毛利->毛利率等
+- 8个概念组层级展开: 盈利能力->[毛利率,净利率,ROE,加权ROE]等
+- 插入位置: pipeline.understand()之后、plan之前，作为Step 1.5
+
+**sql_tool重构(从170行扩到630行)**:
+- 新增列缓存: 启动时一次性加载information_schema
+- 删除硬编码3表过滤，改为_column_exists动态检查
+- _resolve_metric_with_fallback(): 字段回退链
+- _execute_with_retry(): 4级降级重试(完整->去period->去year->全库)
+- _query_compare()重写: 不再硬编码表名交叉查询
+- _query_trend(): 新增pipeline兜底+字段回退标记
+
+**followup_resolver.py(重写)**:
+- 独立FollowupResolver类，6种追问类型
+- resolve()返回结构化结果
+- 追问类型智能识别: 画图->chart、为什么->analysis、第二名->rank
+
+**session.py(重写)**:
+- 删除is_followup()、merge_question()、has_previous_context()
+- 改为4个干净getter
+- slots从字典改为dataclass SlotState
+
+**pipeline.py(修改)**:
+- understand()新增概念组检测: 匹配到概念组时保留原文，不提前替换
+- 交给KG Resolver在Step 1.5统一展开
+
+**sql_generator.py/time_parser.py(修改)**:
+- sql_generator: 优化多指标SQL生成，支持comparison意图
+- time_parser: 重写中文时间解析
+
+**RAG(修改)**:
+- rag_module.py: _tokenize_chinese()从单字改为jieba分词，BM25召回提升
+
+**前端(修改)**:
+- static/style.css: 新增样式
+- static/script.js: 交互优化
+
+**新增文件**:
+- agent/kg_resolver.py、intent_splitter.py、result_merger.py
+- data/附件7.png
+
+**删除的废弃代码**:
+- analysis/(3个文件)、model1_schema_linking/(20+文件)
+- run_app.py、空__init__.py、测试脚本
+
+**其他**:
+- .gitignore增加调试脚本排除模式
+- app.py适配新Agent接口
+
+> **踩坑**: 这个改动最大的教训是模块间信任问题。pipeline理解完->KG Resolver展开->sql_tool执行，这条链路里只要有一个环节不信任上游就会出bug。debug了两天一直在质疑KG Resolver，最后发现是sql_tool自己过滤了。结论: 每个模块只做自己的事，下游信任上游，出问题只查出错的那个环节。
+
+---
 *每次开发完执行 \git add .\ + \git commit -m " Day X: 改动说明"\ + \git push\ 继续记录*

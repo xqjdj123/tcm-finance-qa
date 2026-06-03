@@ -39,19 +39,31 @@ class Session:
         self.last_active = time.time()
         self.history = []
         self.max_history = max_history
-        # 核心槽位
+        # 理解缓存
+        self.last_understanding = None
+        # 核心槽位（数组，支持多公司/多指标）
         self.slots = {
-            "company": None,
-            "indicator": None,
-            "year": None,
+            "companies": [],
+            "indicators": [],
+            "years": [],
             "period": None,
+            "top_k": None,
         }
 
     def update_slots(self, new_slots):
         """更新槽位，只覆盖非空值"""
         for k, v in new_slots.items():
             if v is not None and v != "":
-                self.slots[k] = v
+                if k in ("companies", "indicators", "years") and isinstance(v, list):
+                    if v:
+                        self.slots[k] = v
+                elif k in ("company", "indicator", "year"):
+                    mapped = {"company": "companies", "indicator": "indicators", "year": "years"}
+                    new_k = mapped[k]
+                    if v not in self.slots.get(new_k, []):
+                        self.slots[new_k] = self.slots.get(new_k, []) + [v]
+                else:
+                    self.slots[k] = v
 
     def get_context(self):
         """获取当前有效槽位"""
@@ -74,6 +86,22 @@ class Session:
     def get_recent_history(self, n=3):
         """获取最近n轮对话"""
         return self.history[-n:]
+
+    def get_last_understanding(self):
+        return self.last_understanding
+
+    def update_understanding(self, understanding):
+        self.last_understanding = understanding
+        if understanding.get("companies"):
+            self.slots["companies"] = understanding["companies"]
+        if understanding.get("indicators"):
+            self.slots["indicators"] = understanding["indicators"]
+        if understanding.get("years"):
+            self.slots["years"] = understanding["years"]
+        if understanding.get("period"):
+            self.slots["period"] = understanding["period"]
+        if understanding.get("top_k"):
+            self.slots["top_k"] = understanding["top_k"]
 
     def get_last_turn(self):
         """获取上一轮对话"""

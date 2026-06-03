@@ -135,10 +135,9 @@ def detect_unit_above(main_text, above_texts, below_texts=None, global_unit_fact
             if found:
                 return uf, _get_unit_name(uf), source_text
 
-    # 全局兜底
-    if global_unit_factor and global_unit_factor != 1:
-        return global_unit_factor, _get_unit_name(global_unit_factor), "global_fallback"
-
+    # 全局兜底（只在没有找到任何单位声明时使用）
+    # 注意：如果找到了单位声明但解析失败，不应该使用全局兜底
+    # 因为不同表格可能有不同的单位
     return 1, "元", "default"
 
 

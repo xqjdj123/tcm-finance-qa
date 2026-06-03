@@ -12,10 +12,8 @@ from tqdm import tqdm
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
-from rag_pipeline.config import CHUNKS_JSON_PATH
+from rag_pipeline.config import CHUNKS_JSON_PATH, RAG_INDEX_DIR
 from rag_module import OllamaEmbedding, BM25Okapi
-
-RAG_INDEX_DIR = os.path.join(BASE_DIR, "data", "rag_index")
 FAISS_PATH = os.path.join(RAG_INDEX_DIR, "faiss.index")
 BM25_PATH = os.path.join(RAG_INDEX_DIR, "bm25.pkl")
 META_PATH = os.path.join(RAG_INDEX_DIR, "index_meta.json")

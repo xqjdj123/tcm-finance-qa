@@ -19,7 +19,7 @@ FUZZY_CONDITIONS = {
 }
 
 FIELD_TABLES = {
-    "total_operating_revenue": ["income_sheet", "core_performance_indicators_sheet"],
+    "total_operating_revenue": ["income_sheet"],
     "operating_expense_cost_of_sales": ["income_sheet"],
     "operating_expense_selling_expenses": ["income_sheet"],
     "operating_expense_administrative_expenses": ["income_sheet"],
@@ -29,7 +29,7 @@ FIELD_TABLES = {
     "total_operating_expenses": ["income_sheet"],
     "operating_profit": ["income_sheet"],
     "total_profit": ["income_sheet"],
-    "net_profit": ["income_sheet", "core_performance_indicators_sheet"],
+    "net_profit": ["income_sheet"],
     "asset_impairment_loss": ["income_sheet"],
     "credit_impairment_loss": ["income_sheet"],
     "other_income": ["income_sheet"],
@@ -62,20 +62,6 @@ FIELD_TABLES = {
     "financing_cf_cash_for_debt_repayment": ["cash_flow_sheet"],
     "financing_cf_net_amount": ["cash_flow_sheet"],
     "financing_cf_ratio_of_net_cf": ["cash_flow_sheet"],
-    "total_share_capital": ["core_performance_indicators_sheet"],
-    "eps": ["core_performance_indicators_sheet"],
-    "net_profit_excl_non_recurring": ["core_performance_indicators_sheet"],
-    "net_profit_excl_non_recurring_yoy": ["core_performance_indicators_sheet"],
-    "operating_revenue_yoy_growth": ["core_performance_indicators_sheet"],
-    "operating_revenue_qoq_growth": ["core_performance_indicators_sheet"],
-    "net_profit_yoy_growth": ["core_performance_indicators_sheet"],
-    "net_profit_qoq_growth": ["core_performance_indicators_sheet"],
-    "net_asset_per_share": ["core_performance_indicators_sheet"],
-    "roe": ["core_performance_indicators_sheet"],
-    "operating_cf_per_share": ["core_performance_indicators_sheet"],
-    "gross_profit_margin": ["core_performance_indicators_sheet"],
-    "net_profit_margin": ["core_performance_indicators_sheet"],
-    "roe_weighted_excl_non_recurring": ["core_performance_indicators_sheet"],
 }
 
 CURRENT_YEAR = datetime.now().year
@@ -130,7 +116,7 @@ class SQLGenerator:
                 return field + " " + op + " " + str(val)
         return None
 
-    def _build_where_clause(self, company_cond, time_where, period, time_info, col, cond_clause, main_table=None):
+    def _build_where_clause(self, company_cond, time_where, period, col, cond_clause, main_table=None):
         """构建WHERE子句"""
         prefix = (main_table + ".") if main_table else ""
         where_parts = []
@@ -177,15 +163,23 @@ class SQLGenerator:
 
         period = self.normalize_period(period, question)
 
-        # ===== 时间解析 =====
-        time_info = _parse_time(question)
-        if year and time_info["type"] in ("latest", "latest_quarters"):
-            time_info = {"type": "exact_year", "year": year, "label": str(year) + "年"}
-        elif year:
-            time_info = {"type": "exact_year", "year": year, "label": str(year) + "年"}
-        time_where, time_order, time_limit, time_label = _apply_time(time_info)
-        if time_info["type"] == "exact_year" and not period and not top_k:
-            period = "FY"
+        # ===== 时间条件（直接用 understanding 里的 year/period，不再重新解析）=====
+        time_where = ''
+        time_order = ''
+        time_limit = ''
+        if year:
+            time_where = 'report_year = %d' % year
+        if intent == "time_trend":
+            # 趋势查询：year 作为起始年，查到最新
+            if year:
+                time_where = 'report_year >= %d' % year
+            time_order = 'ORDER BY report_year'
+        if intent in ("stat_query", "fuzzy_intent"):
+            time_order = 'ORDER BY %s DESC' % col
+            time_limit = 'LIMIT 10'
+        if top_k:
+            time_order = 'ORDER BY %s DESC' % col
+            time_limit = 'LIMIT %d' % top_k
 
         # ===== 多公司条件 =====
         if len(companies) >= 2:
@@ -229,18 +223,18 @@ class SQLGenerator:
         if len(cols) == 1:
             # 单字段
             if top_k or intent in ["stat_query", "fuzzy_intent", "comparison"]:
-                select_cols = "stock_abbr, report_year, " + col
+                select_cols = "stock_abbr, report_year, report_period, " + col
             elif intent == "time_trend":
                 select_cols = "report_year, " + col + ", stock_abbr, report_period"
             else:
-                select_cols = col + ", stock_abbr, report_year"
+                select_cols = col + ", stock_abbr, report_year, report_period"
         else:
-            # 多字段：加上表别名防止歧义
-            select_cols = "stock_abbr, report_year, " + ", ".join(cols)
+            # 多字段：加上表别名防止歧义，包含 report_period 用于去重
+            select_cols = "stock_abbr, report_year, report_period, " + ", ".join(cols)
 
                 
         # ===== 构建WHERE子句 =====
-        where_str = self._build_where_clause(company_cond, time_where, period, time_info, col, None)
+        where_str = self._build_where_clause(company_cond, time_where, period, col, None)
 # ===== 决定查询策略 =====
         # 策略1: 跨表JOIN（多字段来自不同表）
         # 策略2: UNION （单字段但候选表有多个）
@@ -280,7 +274,7 @@ class SQLGenerator:
                         + ' AND ' + main_table + '.report_year = ' + ot + '.report_year'
                         + ' AND ' + main_table + '.report_period = ' + ot + '.report_period')
                 
-                where_str = self._build_where_clause(company_cond, time_where, period, time_info, col, None, main_table)
+                where_str = self._build_where_clause(company_cond, time_where, period, col, None, main_table)
                 if where_str:
                     sql_parts.append(where_str)
                 
@@ -309,32 +303,55 @@ class SQLGenerator:
             sql_parts = ['SELECT ' + select_cols, 'FROM ' + tbl]
             if where_str:
                 sql_parts.append(where_str)
-            nn_col = cols[0]
-            if where_str:
-                sql_parts.append('AND ' + nn_col + ' IS NOT NULL')
+            # 单列时检查该列非空，多列时用 OR 检查（任一列有数据即可）
+            if len(cols) == 1:
+                nn_check = cols[0] + ' IS NOT NULL'
             else:
-                sql_parts.append('WHERE ' + nn_col + ' IS NOT NULL')
+                nn_check = '(' + ' IS NOT NULL OR '.join(cols) + ' IS NOT NULL)'
+            if where_str:
+                sql_parts.append('AND ' + nn_check)
+            else:
+                sql_parts.append('WHERE ' + nn_check)
             if order_clause:
                 sql_parts.append(order_clause)
             if limit_clause:
                 sql_parts.append(limit_clause)
             return '\n'.join(sql_parts) + ';'
         
-        # ===== 多表UNION （字段可能在多张表中都有） =====
+        # ===== 多表UNION + 去重 =====
+        # 给每个子查询加优先级：income_sheet=1, balance_sheet=2, cash_flow_sheet=3
         union_parts = []
-        for tbl in candidate_tables:
-            sub = 'SELECT ' + select_cols + ' FROM ' + tbl
+        for idx, tbl in enumerate(candidate_tables):
+            if tbl == 'income_sheet':
+                priority = 1
+            elif tbl == 'balance_sheet':
+                priority = 2
+            elif tbl == 'cash_flow_sheet':
+                priority = 3
+            else:
+                priority = 4
+            sub = 'SELECT ' + select_cols + ', ' + str(priority) + ' AS _tbl_priority FROM ' + tbl
             if where_str:
                 sub += '\n' + where_str
             union_parts.append(sub)
-        
-        full_sql = ' UNION  '.join(union_parts)
-        outer = ['SELECT * FROM (', full_sql, ') AS t']
-        outer.append('WHERE ' + col + ' IS NOT NULL')
+
+        full_sql = ' UNION '.join(union_parts)
+        # 用 ROW_NUMBER 按公司+报告期去重，保留优先级最高的（income_sheet > core_performance）
+        # 多列时用 OR 检查非空（任一列有数据即可）
+        if len(cols) == 1:
+            nn_check = col + ' IS NOT NULL'
+        else:
+            nn_check = '(' + ' IS NOT NULL OR '.join(cols) + ' IS NOT NULL)'
+        outer = [
+            'SELECT ' + select_cols + ' FROM (',
+            '  SELECT *, ROW_NUMBER() OVER (PARTITION BY stock_abbr, report_year, report_period ORDER BY _tbl_priority) AS _rn',
+            '  FROM (' + full_sql + ') AS t',
+            '  WHERE ' + nn_check,
+            ') AS t',
+            'WHERE _rn = 1',
+        ]
         if intent == 'basic_query' and company:
-            outer.append('ORDER BY report_year DESC')
-            if not limit_clause:
-                outer.append('LIMIT 1')
+            outer.append('ORDER BY report_year DESC, report_period DESC')
         elif order_clause:
             outer.append(order_clause)
         if limit_clause:

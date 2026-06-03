@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """SQL查询工具：封装pipeline.query() + 趋势/对比专用查询"""
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "models", "model2_question_understanding"))
 from agent.tools.base import BaseTool
 
 PERIOD_PRIORITY = {"FY": 4, "Q3": 3, "H1": 2, "Q1": 1}
@@ -10,21 +11,15 @@ PERIOD_FALLBACK = ["FY", "Q3", "H1", "Q1"]
 
 class SQLTool(BaseTool):
     name = "sql_query"
-    description = """
-    查询财务数据库。
-    用于：查具体数值（营收、净利润、总资产、负债、现金流等）
-    输入：question(自然语言问题)
-    返回：查询结果数据
-    不用于：分析原因、查研报内容、计算派生指标
-    """
+    description = """查询财务数据库。用于：查具体数值（营收、净利润、总资产等）"""
 
     def __init__(self):
         self._pipeline = None
         self._db_conn = None
+        self._column_cache = None  # 启动时懒加载，缓存所有表的列名
 
     def _get_pipeline(self):
         if self._pipeline is None:
-            sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "models", "model2_question_understanding"))
             from pipeline import FinancialQAPipeline
             self._pipeline = FinancialQAPipeline()
         return self._pipeline
@@ -38,8 +33,124 @@ class SQLTool(BaseTool):
             )
         return self._db_conn
 
+    # ========== 启动时列名缓存（一次性加载，不运行时查 information_schema）==========
+    def refresh_column_cache(self):
+        """强制刷新列名缓存（新建表后调用）"""
+        self._column_cache = None
+        self._ensure_column_cache()
+
+    def _ensure_column_cache(self):
+        if self._column_cache is not None:
+            return
+        cache = {}
+        try:
+            conn = self._get_conn()
+            cursor = conn.cursor()
+            cursor.execute("SELECT table_name, column_name FROM information_schema.columns WHERE table_schema = 'finance_data'")
+            for table_name, column_name in cursor.fetchall():
+                if table_name not in cache:
+                    cache[table_name] = set()
+                cache[table_name].add(column_name)
+            cursor.close()
+            self._column_cache = cache
+            print(f"[SQLTool] Column cache loaded: {sum(len(v) for v in cache.values())} columns across {len(cache)} tables")
+        except Exception as e:
+            print(f"[SQLTool] Column cache load failed: {e}")
+            self._column_cache = {}  # 空缓存，后续检查都会返回不存在
+
+    def _column_exists(self, table, column):
+        """查缓存，不访问数据库"""
+        self._ensure_column_cache()
+        return column in self._column_cache.get(table, set())
+
+    def _execute_sql(self, sql):
+        """执行 SQL，返回结果列表或 None"""
+        if not sql or sql.startswith("--"):
+            return None
+        try:
+            conn = self._get_conn()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute(sql)
+            results = cursor.fetchall()
+            cursor.close()
+            return results if results else None
+        except Exception as e:
+            print(f"  [SQLTool] SQL执行错误: {e}")
+            return None
+
+    def _list_available_tables(self, metric_en):
+        """检查指标可能存在于哪些表（基于 field_matcher 的 table + 备选表）"""
+        candidates = [metric_en]
+        tables_checked = ["income_sheet", "balance_sheet", "cash_flow_sheet"]
+        available = []
+        for tbl in tables_checked:
+            for col in candidates:
+                if self._column_exists(tbl, col):
+                    available.append(tbl)
+                    break
+            # 也检查列名本身
+            if self._column_exists(tbl, metric_en):
+                if tbl not in available:
+                    available.append(tbl)
+        return available
+
+    # ========== 字段解析：统一调 field_matcher，不另起一套 ==========
+    def _resolve_metric(self, metric_name):
+        """
+        通过 pipeline 的 field_matcher 解析字段名
+        返回 (db_field, table) 或 (None, None)
+        """
+        if not metric_name:
+            return None, None
+        try:
+            from field_matcher import match as field_match
+            results = field_match(metric_name)
+            if results and len(results) > 0:
+                r = results[0]
+                if r.get("score", 0) >= 0.8:
+                    return r["column_en"], r["table_name"]
+            return None, None
+        except Exception as e:
+            print(f"[SQLTool] field_matcher error: {e}")
+            return None, None
+
+    def _resolve_metric_with_fallback(self, metric_name):
+        """
+        Resolve field with explicit fallback. Handles both Chinese and English metric names.
+        Returns (db_field, table, display_name, substituted)
+        """
+        # 1. Chinese name -> use field_matcher (single source of truth)
+        is_chinese = any('\u4e00' <= c <= '\u9fff' for c in metric_name)
+        if is_chinese:
+            db_field, table = self._resolve_metric(metric_name)
+        else:
+            db_field, table = metric_name, None
+
+        # 2. Check if column exists in DB
+        if db_field:
+            if table and self._column_exists(table, db_field):
+                return db_field, table, metric_name, False
+            for tbl in ["income_sheet", "balance_sheet", "cash_flow_sheet"]:
+                if self._column_exists(tbl, db_field):
+                    return db_field, tbl, metric_name, False
+
+        # 3. Column not found -> try known fallbacks (explicitly tagged)
+        fallback_map = {
+            "total_profit": [("net_profit", "Net Profit")],
+            "operating_profit": [("net_profit", "Net Profit")],
+        }
+        key = db_field or metric_name
+        if key in fallback_map:
+            for fb_field, fb_display in fallback_map[key]:
+                for tbl in ["income_sheet"]:
+                    if self._column_exists(tbl, fb_field):
+                        return fb_field, tbl, fb_display, True
+
+        return None, None, None, False
+
     def run(self, inputs: dict) -> dict:
         question = inputs.get("question", "")
+        understanding = inputs.get("understanding")
         query_type = inputs.get("query_type", "auto")
 
         if not question:
@@ -51,30 +162,323 @@ class SQLTool(BaseTool):
             elif query_type == "compare":
                 return self._query_compare(inputs)
             else:
-                return self._query_auto(question)
+                return self._query_with_understanding(question, understanding)
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _query_auto(self, question):
-        """标准查询：走pipeline"""
-        pipeline = self._get_pipeline()
-        result = pipeline.query(question)
-        data = result.get("data")
-        # 数据库单位统一为万元
-        unit = "万元" if data else ""
-        return {
-            "success": result.get("success", False),
-            "data": data,
-            "sql": result.get("sql"),
-            "answer": result.get("answer"),
-            "confidence": result.get("confidence", 0),
-            "slots": result.get("slots", {}),
-            "unit": unit,
+    def _query_with_understanding(self, question, understanding):
+        """直接用 understanding 生成 SQL 并执行，不再重新跑 NER/Model2/time_parser"""
+        if not understanding:
+            return {"success": False, "error": "缺少 understanding"}
+
+        from sql_generator import SQLGenerator
+        from schema_mapping import match as schema_match
+
+        intent = understanding.get("intent", "basic_query")
+        companies = understanding.get("companies", [])
+        indicators = understanding.get("indicators", [])
+        years = understanding.get("years", [])
+        period = understanding.get("period")
+        top_k = understanding.get("top_k")
+
+        # 构建 understanding dict 给 sql_generator
+        gen_und = {
+            "intent": intent,
+            "company": companies[0] if companies else None,
+            "companies": companies,
+            "year": years[0] if years else None,
+            "period": period,
+            "top_k": top_k,
+            "indicators": indicators,
+            "is_multi_indicator": len(indicators) > 1,
+            "is_multi_company": len(companies) > 1,
         }
 
+        # 字段匹配（indicators 可能是中文指标名或英文字段名）
+        all_matches = []
+        seen_cols = set()
+        for ind in indicators:
+            # 英文字段名直接查 SCHEMA_DICT，中文走 schema_match
+            if all(ord(c) < 128 for c in ind):
+                # KG Resolver 已处理的英文字段名，直接查列是否存在
+                from field_dict import SCHEMA_DICT
+                if ind in SCHEMA_DICT:
+                    info = SCHEMA_DICT[ind]
+                    table = info["table"]
+                    if self._column_exists(table, ind):
+                        matches = [{"column_en": ind, "table_name": table,
+                                    "unit": info["unit"], "score": 1.0,
+                                    "display": table + "." + ind + ": " + info["label"]}]
+                    else:
+                        matches = None
+                else:
+                    matches = None
+            else:
+                matches = schema_match(ind, top_k=3)
+            if matches:
+                col_en = matches[0]["column_en"]
+                if col_en not in seen_cols:
+                    all_matches.append(matches[0])
+                    seen_cols.add(col_en)
+
+        if not all_matches:
+            return {"success": False, "error": "未匹配到字段", "data": []}
+
+        # 生成 SQL
+        sql_gen = SQLGenerator()
+        sql = sql_gen.generate(gen_und, all_matches, question)
+        if not sql or sql.startswith("--"):
+            return {"success": False, "error": "SQL生成失败", "data": []}
+
+        # 执行（带重试）
+        result_data, sql_str, retry_count, reason = self._execute_with_retry(sql, gen_und, sql_gen, all_matches, question)
+
+        # 对比/排名查询：每家公司只保留优先级最高的报告期
+        if result_data and intent in ("comparison", "stat_query"):
+            result_data = self._dedup_by_company(result_data)
+            # 补充查了但没数据的公司（让用户知道查过）
+            if companies:
+                found = {r.get("stock_abbr") for r in result_data}
+                for comp in companies:
+                    if comp not in found:
+                        result_data.append({"stock_abbr": comp, "report_year": years[0] if years else "", "_no_data": True})
+
+        # 格式化答案
+        if result_data:
+            answer = self._format_answer(intent, companies, indicators, years, period, top_k, result_data, all_matches)
+        else:
+            answer = ""
+
+        return {
+            "success": bool(result_data),
+            "data": result_data,
+            "sql": sql_str,
+            "answer": answer,
+            "confidence": 0.85 if result_data else 0,
+            "retry_count": retry_count,
+            "reason": reason,
+            "unit": "万元" if result_data else "",
+        }
+
+    def _execute_with_retry(self, sql, understanding, sql_gen, all_matches, question):
+        """4级降级重试：完整 → 去period → 去year → 全库"""
+        import re
+        retries = [
+            (False, "完整参数"),
+            (True, "去掉period"),
+        ]
+
+        for i, (strip_period, desc) in enumerate(retries):
+            current_sql = sql
+
+            if strip_period:
+                current_sql = re.sub(r"\s*AND\s+report_period\s*=\s*'[^']*'", "", current_sql)
+                current_sql = re.sub(r"\s*report_period\s*=\s*'[^']*'\s*AND\s*", " ", current_sql)
+                current_sql = re.sub(r"WHERE\s+AND", "WHERE", current_sql)
+
+            print(f"  [重试{i}] {desc}")
+            print(f"  SQL: {current_sql[:200]}...")
+            result_data = self._execute_sql(current_sql)
+            if result_data:
+                print(f"  查询到 {len(result_data)} 条数据")
+                return result_data, current_sql, i, f"第{i+1}次尝试成功（{desc}）"
+            else:
+                print(f"  查询无数据")
+
+        # 最后尝试：去掉year，取最新
+        u = dict(understanding)
+        u["year"] = None
+        u["period"] = None
+        sql3 = sql_gen.generate(u, all_matches, question)
+        if sql3 and not sql3.startswith("--"):
+            sql3 = re.sub(r"\s*AND\s+report_period\s*=\s*'[^']*'", "", sql3)
+            sql3 = re.sub(r"\s*report_period\s*=\s*'[^']*'\s*AND\s*", " ", sql3)
+            sql3 = re.sub(r"WHERE\s+AND", "WHERE", sql3)
+            print(f"  [重试2] 去掉year，取最新")
+            result_data = self._execute_sql(sql3)
+            if result_data:
+                return result_data, sql3, 2, "第3次尝试成功（去掉year）"
+
+        return None, sql, len(retries), "所有重试均无数据"
+
+    # 报告期优先级：FY > H1 > Q3 > Q1
+    PERIOD_PRIORITY = {"FY": 4, "H1": 3, "Q3": 2, "Q1": 1}
+
+    def _is_row_valid(self, row):
+        """检查一行数据的比率字段是否在合理范围内（排除明显错误的提取结果）"""
+        for key, val in row.items():
+            if val is None:
+                continue
+            if key in ("stock_abbr", "report_year", "report_period", "stock_code", "rank", "note",
+                       "_tbl_priority", "_rn", "_no_data"):
+                continue
+            try:
+                v = float(val)
+                # 比率字段：毛利率/净利率/ROE 合理范围 -100% ~ 100%
+                if any(kw in key for kw in ("margin", "ratio", "roe", "growth")):
+                    if v > 1000 or v < -1000:
+                        return False
+            except (ValueError, TypeError):
+                pass
+        return True
+
+    def _count_valid_values(self, row):
+        """统计行中非空且合理的值数量"""
+        count = 0
+        for key, val in row.items():
+            if val is None:
+                continue
+            if key in ("stock_abbr", "report_year", "report_period", "stock_code", "rank", "note",
+                       "_tbl_priority", "_rn", "_no_data"):
+                continue
+            try:
+                float(val)
+                count += 1
+            except (ValueError, TypeError):
+                pass
+        return count
+
+    def _dedup_by_company(self, data):
+        """对比/排名查询：每家公司只保留优先级最高的有效报告期"""
+        best = {}
+        for row in data:
+            name = row.get("stock_abbr", "")
+            rp = row.get("report_period", "")
+            pri = self.PERIOD_PRIORITY.get(rp, 0)
+            row_valid = self._is_row_valid(row)
+
+            if name not in best:
+                best[name] = (row, pri, row_valid)
+            else:
+                old_row, old_pri, old_valid = best[name]
+                # 优先选择有效数据
+                if row_valid and not old_valid:
+                    best[name] = (row, pri, row_valid)
+                elif row_valid == old_valid:
+                    if pri > old_pri:
+                        best[name] = (row, pri, row_valid)
+                    elif pri == old_pri:
+                        old_nulls = self._count_valid_values(old_row)
+                        new_nulls = self._count_valid_values(row)
+                        if new_nulls > old_nulls:
+                            best[name] = (row, pri, row_valid)
+        return [v[0] for v in best.values()]
+
+    def _format_answer(self, intent, companies, indicators, years, period, top_k, data, matches):
+        """格式化答案文本"""
+        if not data:
+            return "未查询到相关数据。"
+
+        # 指标中文名
+        indicator_cn = indicators[0] if indicators else ""
+        if matches and matches[0].get("display"):
+            disp = matches[0]["display"]
+            if ": " in disp:
+                indicator_cn = disp.split(": ", 1)[1]
+            elif "：" in disp:
+                indicator_cn = disp.split("：", 1)[1]
+
+        value_cols = [k for k in data[0].keys()
+                      if k not in ("stock_abbr", "report_year", "report_period", "stock_code", "rank", "note",
+                                   "_tbl_priority", "_rn")]
+
+        def fmt_num(num):
+            if num is None:
+                return "0"
+            try:
+                n = float(num)
+                if abs(n) >= 10000:
+                    return "{:.2f}".format(n)
+                elif abs(n) >= 1:
+                    return "{:.2f}".format(n)
+                else:
+                    return "{:.4f}".format(n)
+            except:
+                return str(num)
+
+        if intent == "basic_query":
+            name = data[0].get("stock_abbr", companies[0] if companies else "")
+            y = data[0].get("report_year", years[0] if years else "")
+            if len(data) == 1:
+                val = data[0].get(value_cols[0], 0) if value_cols else 0
+                rp = data[0].get("report_period", "")
+                pstr = "（" + rp + "）" if rp and rp != "FY" else ""
+                return f"{name}{y}年{pstr}的{indicator_cn}是 {fmt_num(val)} 万元。"
+            else:
+                lines = [f"{name}{y}年{indicator_cn}："]
+                for row in data:
+                    val = row.get(value_cols[0], 0) if value_cols else 0
+                    rp = row.get("report_period", "")
+                    note = row.get("note", "")
+                    line = f"  {rp if rp else '未知'}：{fmt_num(val)} 万元"
+                    if note:
+                        line += f"（{note}）"
+                    lines.append(line)
+                return "\n".join(lines)
+
+        # stat_query / comparison / time_trend
+        # 从 matches 获取指标中文名
+        metric_names = []
+        for m in (matches or []):
+            disp = m.get("display", "")
+            cn = disp.split(": ", 1)[1] if ": " in disp else (disp.split("：", 1)[1] if "：" in disp else m.get("column_en", ""))
+            metric_names.append(cn)
+        if not metric_names:
+            metric_names = [self.METRIC_EN_TO_CN.get(vc, vc) for vc in value_cols]
+
+        lines = []
+        if top_k:
+            title = "、".join(metric_names) if len(metric_names) > 1 else indicator_cn
+            lines.append(f"{title}排名前{top_k}的企业：")
+        else:
+            title = "、".join(metric_names) if len(metric_names) > 1 else indicator_cn
+            lines.append(f"{title}查询结果：")
+
+        for i, row in enumerate(data[:10], 1):
+            name = row.get("stock_abbr", "未知")
+            y = row.get("report_year", "")
+            rp = row.get("report_period", "")
+            note = row.get("note", "")
+            pstr = f" {rp}" if rp and rp != "FY" else ""
+            nstr = f"（{note}）" if note else ""
+
+            # 查了但没数据的公司
+            if row.get("_no_data"):
+                if y:
+                    lines.append(f"  {i}. {name}（{y}年{pstr}）：暂无数据")
+                else:
+                    lines.append(f"  {i}. {name}：暂无数据")
+                continue
+
+            if len(value_cols) <= 1:
+                # 单指标
+                val = row.get(value_cols[0], 0) if value_cols else 0
+                unit = "万元" if "margin" not in (value_cols[0] if value_cols else "") and "ratio" not in (value_cols[0] if value_cols else "") and "roe" not in (value_cols[0] if value_cols else "") else "%"
+                if y:
+                    lines.append(f"  {i}. {name}（{y}年{pstr}）：{fmt_num(val)} {unit}{nstr}")
+                else:
+                    lines.append(f"  {i}. {name}：{fmt_num(val)} {unit}{nstr}")
+            else:
+                # 多指标：每个指标一行
+                if y:
+                    lines.append(f"  {i}. {name}（{y}年{pstr}）：")
+                else:
+                    lines.append(f"  {i}. {name}：")
+                for vc, mn in zip(value_cols, metric_names):
+                    val = row.get(vc)
+                    if val is not None:
+                        unit = "%" if any(kw in vc for kw in ("margin", "ratio", "roe", "growth")) else "万元"
+                        lines.append(f"     {mn}：{fmt_num(val)} {unit}")
+                if note:
+                    lines.append(f"     备注：{note}")
+        return "\n".join(lines)
+
     def _query_trend(self, inputs):
-        """趋势查询：每年只返回一条，优先级 FY > Q3 > H1 > Q1"""
-        metric = inputs.get("metric", "net_profit")
+        """
+        趋势查询：每年只返回一条，优先线 FY > Q3 > H1 > Q1
+        字段解析统一走 field_matcher，回退时显式标记
+        """
+        raw_metric = inputs.get("metric", "net_profit")
         company = inputs.get("company", "")
         year_start = inputs.get("year_start", 2022)
         year_end = inputs.get("year_end", 2026)
@@ -82,17 +486,62 @@ class SQLTool(BaseTool):
         if not company:
             return {"success": False, "error": "缺少company参数"}
 
+        # 优先用 field_matcher 解析字段名
+        # 如果 raw_metric 已经是英文名（如 "net_profit"），直接尝试
+        actual_metric, table, display_name, substituted = self._resolve_metric_with_fallback(raw_metric)
+
+        if not actual_metric or not table:
+            # field_matcher 也没解析到，用原始值尝试所有表兜底
+            actual_metric = raw_metric
+            for tbl in ["income_sheet", "balance_sheet", "cash_flow_sheet"]:
+                if self._column_exists(tbl, actual_metric):
+                    table = tbl
+                    break
+
+        if not table or not self._column_exists(table, actual_metric):
+            # 在所有表中都找不到该列
+            return {
+                "success": False,
+                "data": [],
+                "error": f"数据库中不存在字段「{raw_metric}」，且无合适替代字段",
+                "reason": "field_not_found",
+                "metric": raw_metric,
+            }
+
         conn = self._get_conn()
         c = conn.cursor(dictionary=True)
 
-        # 查所有表
-        tables = ["income_sheet", "core_performance_indicators_sheet"]
         all_rows = []
-        for tbl in tables:
-            sql = "SELECT stock_abbr, report_year, report_period, %s FROM %s WHERE stock_abbr LIKE %%s AND report_year BETWEEN %%s AND %%s AND %s IS NOT NULL" % (metric, tbl, metric)
+        try:
+            sql = "SELECT stock_abbr, report_year, report_period, %s FROM %s WHERE stock_abbr LIKE %%s AND report_year BETWEEN %%s AND %%s AND %s IS NOT NULL" % (actual_metric, table, actual_metric)
             c.execute(sql, ("%" + company + "%", year_start, year_end))
             all_rows.extend(c.fetchall())
+        except Exception as e:
+            c.close()
+            return {"success": False, "data": [], "error": str(e), "reason": "query_error", "metric": actual_metric}
+
         c.close()
+
+        if not all_rows:
+            # 尝试用 pipeline 兜底
+            try:
+                pipeline = self._get_pipeline()
+                result = pipeline.query(inputs.get("question", ""))
+                if result.get("success") and result.get("data"):
+                    return {
+                        "success": True,
+                        "data": result["data"],
+                        "query_type": "trend",
+                        "company": company,
+                        "metric": actual_metric,
+                        "note": "使用pipeline兜底查询",
+                        "substituted": substituted,
+                        "original_metric": raw_metric if substituted else None,
+                        "display_metric": display_name if substituted else None,
+                    }
+            except:
+                pass
+            return {"success": False, "data": [], "error": f"未找到 {company} 在 {year_start}-{year_end} 年的数据", "reason": "no_data"}
 
         # 每年只保留优先级最高的报告期
         best_per_year = {}
@@ -105,7 +554,6 @@ class SQLTool(BaseTool):
 
         result = sorted(best_per_year.values(), key=lambda x: x["report_year"])
 
-        # 标注非年报数据
         for row in result:
             if row.get("report_period") != "FY":
                 row["note"] = "注：%d年无年报，使用%s数据" % (row["report_year"], row.get("report_period", ""))
@@ -115,17 +563,32 @@ class SQLTool(BaseTool):
             "data": result,
             "query_type": "trend",
             "company": company,
-            "metric": metric,
+            "metric": actual_metric,
+            "substituted": substituted,
+            "original_metric": raw_metric if substituted else None,
+            "display_metric": display_name if substituted else None,
         }
 
     def _query_compare(self, inputs):
         """对比查询：每家公司独立查，各自降级"""
-        metric = inputs.get("metric", "total_operating_revenue")
+        raw_metric = inputs.get("metric", "total_operating_revenue")
         companies = inputs.get("companies", [])
         year = inputs.get("year", 2024)
 
         if not companies:
             return {"success": False, "error": "缺少companies参数"}
+
+        # 解析字段
+        actual_metric, table, display_name, substituted = self._resolve_metric_with_fallback(raw_metric)
+        if not actual_metric or not table:
+            actual_metric = raw_metric
+            for tbl in ["income_sheet", "balance_sheet", "cash_flow_sheet"]:
+                if self._column_exists(tbl, actual_metric):
+                    table = tbl
+                    break
+
+        if not table:
+            return {"success": False, "data": [], "error": f"数据库中不存在字段「{raw_metric}」", "reason": "field_not_found"}
 
         conn = self._get_conn()
         c = conn.cursor(dictionary=True)
@@ -135,16 +598,12 @@ class SQLTool(BaseTool):
             row = None
             used_period = None
 
-            # 按优先级逐个尝试
             for period in PERIOD_FALLBACK:
-                for tbl in ["income_sheet", "core_performance_indicators_sheet"]:
-                    sql = "SELECT stock_abbr, report_year, report_period, %s FROM %s WHERE stock_abbr LIKE %%s AND report_year = %%s AND report_period = %%s AND %s IS NOT NULL LIMIT 1" % (metric, tbl, metric)
-                    c.execute(sql, ("%" + company + "%", year, period))
-                    row = c.fetchone()
-                    if row:
-                        used_period = period
-                        break
+                sql = "SELECT stock_abbr, report_year, report_period, %s FROM %s WHERE stock_abbr LIKE %%s AND report_year = %%s AND report_period = %%s AND %s IS NOT NULL LIMIT 1" % (actual_metric, table, actual_metric)
+                c.execute(sql, ("%" + company + "%", year, period))
+                row = c.fetchone()
                 if row:
+                    used_period = period
                     break
 
             if row:
@@ -155,7 +614,7 @@ class SQLTool(BaseTool):
                 results.append({
                     "stock_abbr": company,
                     "report_year": year,
-                    metric: None,
+                    actual_metric: None,
                     "note": "注：%d年无数据" % year,
                 })
 
@@ -166,5 +625,8 @@ class SQLTool(BaseTool):
             "data": results,
             "query_type": "compare",
             "companies": companies,
-            "metric": metric,
+            "metric": actual_metric,
+            "substituted": substituted,
+            "original_metric": raw_metric if substituted else None,
+            "display_metric": display_name if substituted else None,
         }

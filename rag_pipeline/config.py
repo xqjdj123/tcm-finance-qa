@@ -8,7 +8,7 @@ import os
 # ===== 路径配置 =====
 BASE_DIR = r'D:\python-leanrn\codex'
 MD_DIR = os.path.join(BASE_DIR, 'data', '研报总MD')
-RAG_INDEX_DIR = os.path.join(BASE_DIR, 'data', 'rag_index')
+RAG_INDEX_DIR = os.path.join(BASE_DIR, 'models', 'rag_index')
 
 # ===== FAISS/BM25 索引文件 =====
 FAISS_INDEX_PATH = os.path.join(RAG_INDEX_DIR, 'faiss.index')

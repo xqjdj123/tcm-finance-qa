@@ -8,6 +8,7 @@ from sql_generator import SQLGenerator, FIELD_TABLES
 from ner_inference import NERExtractor
 from time_parser import parse_time as parse_question_time
 
+
 # ===== 公司名字典 =====
 COMPANY_NAMES = ["白云山", "云南白药", "华润三九", "同仁堂", "太极集团", "步长制药", "以岭药业",
     "片仔癀", "济川药业", "天士力", "达仁堂", "瑞康医药", "昆药集团", "康恩贝", "信邦制药",
@@ -57,6 +58,56 @@ class FinancialQAPipeline:
         except Exception as e:
             print("  数据库连接失败: " + str(e))
 
+
+    def understand(self, question):
+        """return structured understanding without SQL"""
+        ner_slots = self.ner.extract_slots(question) if self.ner and self.ner.model else {}
+        understanding = self.model2.understand(question)
+        intent = understanding.get("intent", "basic_query")
+        companies = ner_slots.get("COMP", [])
+        if not companies and understanding.get("company"):
+            companies = [understanding["company"]]
+        indicators_raw = ner_slots.get("METRIC", [])
+        if not indicators_raw and understanding.get("indicator"):
+            indicators_raw = [understanding["indicator"]]
+        indicators = []
+        for ind in indicators_raw:
+            try:
+                from field_matcher import match as field_match
+                r = field_match(ind)
+                if r and r[0].get("score", 0) >= 0.7:
+                    if r[0].get("match_type") == "concept_group":
+                        # 概念组保留原文（如"盈利能力"），交给 KG resolver 展开
+                        indicators.append(ind)
+                    else:
+                        indicators.append(r[0]["column_en"])
+                else:
+                    indicators.append(ind)
+            except:
+                indicators.append(ind)
+        years = []
+        if understanding.get("year"):
+            years = [understanding["year"]]
+        if intent == "time_trend" and not years:
+            yr_m = re.search(r"(20\d{2})\u5e74\u5230(20\d{2})\u5e74", question)
+            if yr_m:
+                years = list(range(int(yr_m.group(1)), int(yr_m.group(2)) + 1))
+            elif re.search("近", question):
+                from datetime import datetime
+                years = list(range(datetime.now().year - 4, datetime.now().year))
+        period = understanding.get("period") or (ner_slots.get("PERIOD", [None])[0] if ner_slots.get("PERIOD") else None)
+        return {
+            "intent": intent,
+            "companies": companies,
+            "indicators": indicators,
+            "years": years,
+            "period": period,
+            "entities": ner_slots,
+            "needs_chart": understanding.get("needs_chart", False),
+            "chart_type": understanding.get("chart_type"),
+            "needs_rag": understanding.get("needs_rag", False),
+            "top_k": understanding.get("top_k"),
+        }
     def query(self, question, is_multi_turn=False):
         print("\n" + "=" * 60)
         print("问题: " + question)
@@ -298,7 +349,19 @@ class FinancialQAPipeline:
         is_multi = understanding.get("is_multi_indicator", False)
         if not data:
             return "未查询到相关数据。"
-        value_cols = [k for k in data[0].keys() if k not in ("stock_abbr", "report_year", "report_period", "stock_code")]
+
+        # 用字段中文名（matches里的display）代替英文indicator
+        indicator_cn = indicator
+        if matches and matches[0].get("display"):
+            # "income_sheet.net_profit: 净利润" → 取冒号后面的部分
+            disp = matches[0]["display"]
+            if ": " in disp:
+                indicator_cn = disp.split(": ", 1)[1]
+            elif "：" in disp:
+                indicator_cn = disp.split("：", 1)[1]
+
+        value_cols = [k for k in data[0].keys() if k not in ("stock_abbr", "report_year", "report_period", "stock_code", "rank", "note")]
+
         if is_multi or len(value_cols) > 1:
             lines = []
             if top_k:
@@ -306,33 +369,59 @@ class FinancialQAPipeline:
             for i, row in enumerate(data[:10], 1):
                 parts = [str(i) + ". " + row.get("stock_abbr", "未知")]
                 y = row.get("report_year", "")
+                rp = row.get("report_period", "")
                 if y: parts.append(str(y) + "年")
+                if rp: parts.append(rp)
                 for vc in value_cols:
                     val = row.get(vc, "")
                     if val is not None and val != "":
                         parts.append(self._format_num(val) + "万元")
+                note = row.get("note", "")
+                if note: parts.append("(" + note + ")")
                 lines.append("  ".join(parts))
             return "\n".join(lines)
+
         if intent == "basic_query" and data:
-            row = data[0]
-            val = row.get(value_cols[0], 0) if value_cols else 0
-            name = row.get("stock_abbr", company)
-            y = row.get("report_year", year)
-            return name + str(y) + "年的" + indicator + "是 " + self._format_num(val) + " 万元。"
+            name = data[0].get("stock_abbr", company)
+            y = data[0].get("report_year", year)
+            if len(data) == 1:
+                # 单条数据
+                val = data[0].get(value_cols[0], 0) if value_cols else 0
+                rp = data[0].get("report_period", "")
+                period_str = "（" + rp + "）" if rp and rp != "FY" else ""
+                note = data[0].get("note", "")
+                note_str = "。" + note if note else "。"
+                return name + str(y) + "年" + period_str + "的" + indicator_cn + "是 " + self._format_num(val) + " 万元" + note_str
+            else:
+                # 多条数据（多个报告期）— 全部展示
+                lines = [name + str(y) + "年" + indicator_cn + "："]
+                for row in data:
+                    val = row.get(value_cols[0], 0) if value_cols else 0
+                    rp = row.get("report_period", "")
+                    note = row.get("note", "")
+                    line = "  " + (rp if rp else "未知") + "：" + self._format_num(val) + " 万元"
+                    if note: line += "（" + note + "）"
+                    lines.append(line)
+                return "\n".join(lines)
+
         if intent in ("stat_query", "fuzzy_intent", "comparison", "time_trend", "analysis_query") and data:
             lines = []
             if top_k:
-                lines.append(indicator + "排名前" + str(top_k) + "的企业：")
+                lines.append(indicator_cn + "排名前" + str(top_k) + "的企业：")
             else:
-                lines.append(indicator + "查询结果：")
+                lines.append(indicator_cn + "查询结果：")
             for i, row in enumerate(data[:10], 1):
                 name = row.get("stock_abbr", "未知")
                 val = row.get(value_cols[0], 0) if value_cols else 0
                 y = row.get("report_year", "")
+                rp = row.get("report_period", "")
+                note = row.get("note", "")
+                period_str = " " + rp if rp and rp != "FY" else ""
+                note_str = "（" + note + "）" if note else ""
                 if y:
-                    lines.append("  " + str(i) + ". " + name + "(" + str(y) + "年): " + self._format_num(val) + "万元")
+                    lines.append("  " + str(i) + ". " + name + "（" + str(y) + "年" + period_str + "）：" + self._format_num(val) + " 万元" + note_str)
                 else:
-                    lines.append("  " + str(i) + ". " + name + ": " + self._format_num(val) + "万元")
+                    lines.append("  " + str(i) + ". " + name + "：" + self._format_num(val) + " 万元" + note_str)
             return "\n".join(lines)
         return "查询到 " + str(len(data)) + " 条数据。"
 

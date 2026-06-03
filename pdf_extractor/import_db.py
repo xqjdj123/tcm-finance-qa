@@ -12,7 +12,7 @@ from pdf_extractor.confidence_scorer import P as score_p, F as score_f, V as sco
 
 # ===== 数据库配置 =====
 DB = {"host":"127.0.0.1","port":3306,"user":"root","password":"433127hj","database":"finance_data","charset":"utf8mb4"}
-TABLES = {"income_sheet","balance_sheet","cash_flow_sheet","core_performance_indicators_sheet"}
+TABLES = {"income_sheet","balance_sheet","cash_flow_sheet"}
 
 # ===== 字段中文名映射 =====
 FIELD_CN = {
@@ -38,9 +38,9 @@ UNIT_FACTOR = {
 
 # ===== 需要检查的字段（用于异常检测） =====
 CHECK_FIELDS = {
-    "income_sheet": ["total_operating_revenue", "net_profit"],
-    "balance_sheet": ["asset_total_assets"],
-    "cash_flow_sheet": ["operating_cf_net_amount"],
+    "income_sheet": ["total_operating_revenue", "net_profit", "total_profit", "operating_profit"],
+    "balance_sheet": ["asset_total_assets", "liability_total_liabilities", "equity_total_equity"],
+    "cash_flow_sheet": ["operating_cf_net_amount", "investing_cf_net_amount", "financing_cf_net_amount"],
 }
 
 
@@ -220,7 +220,7 @@ class DataImporter:
         self._save_metadata(sc, name, yr, rp, fp, report_unit, unit_factor, unit_source_text, conf)
 
         # 入库
-        self._save_data(sc, name, yr, rp, rt, tbl_data, report_unit)
+        self._save_data(sc, name, yr, rp, rt, tbl_data, report_unit, unit_factor)
 
         # 异常检测：插入 pending_review
         self._detect_anomaly(sc, name, yr, rp, tbl_data, report_unit, fp)
@@ -259,7 +259,7 @@ class DataImporter:
         except Exception as e:
             print("  [WARN] metadata save failed: %s" % e)
 
-    def _save_data(self, sc, name, yr, rp, rt, tbl_data, report_unit):
+    def _save_data(self, sc, name, yr, rp, rt, tbl_data, report_unit, unit_factor):
         """保存数据到各表"""
         for tbl, kv in tbl_data.items():
             if not kv: continue
@@ -269,10 +269,12 @@ class DataImporter:
             """ % tbl, (sc, name or sc, yr, rp, rt, report_unit, "万元"))
 
             for fld, val in kv.items():
+                # 将原始值转换为万元
+                std_val = val * unit_factor / 10000
                 self.cur.execute("""
                     UPDATE %s SET %s=%%s, report_type=%%s, unit_raw=%%s, unit_std=%%s
                     WHERE stock_code=%%s AND report_year=%%s AND report_period=%%s
-                """ % (tbl, fld), (val, rt, report_unit, "万元", sc, yr, rp))
+                """ % (tbl, fld), (std_val, rt, report_unit, "万元", sc, yr, rp))
 
         self.conn.commit()
 
@@ -294,19 +296,17 @@ class DataImporter:
 
                 # 检查是否异常大（> 1亿）
                 if abs(val) > 1e8:
-                    # 检查是否是元单位（需要转换）
-                    if report_unit == "元":
-                        # 插入 pending_review
-                        indicator_cn = FIELD_CN.get(field, field)
-                        try:
-                            self.cur.execute("""
-                                INSERT INTO pending_review
-                                (company, stock_code, period, indicator, table_name, raw_value, unit_raw, reason, source_file)
-                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                            """, (name, sc, rp, indicator_cn, tbl, val, report_unit,
-                                  "数据异常大，可能单位错误", fp))
-                        except Exception as e:
-                            pass
+                    # 插入 pending_review（不管单位是什么）
+                    indicator_cn = FIELD_CN.get(field, field)
+                    try:
+                        self.cur.execute("""
+                            INSERT INTO pending_review
+                            (company, stock_code, period, indicator, table_name, raw_value, unit_raw, reason, source_file)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """, (name, sc, rp, indicator_cn, tbl, val, report_unit,
+                              "数据异常大，可能单位错误", fp))
+                    except Exception as e:
+                        pass
 
         self.conn.commit()
 
@@ -413,14 +413,14 @@ def main():
     """主函数"""
     import argparse
     parser = argparse.ArgumentParser(description='数据导入工具')
-    parser.add_argument('--import', action='store_true', help='导入所有JSON文件')
+    parser.add_argument('--import-data', action='store_true', help='导入所有JSON文件')
     parser.add_argument('--review', action='store_true', help='审核 pending_review 表')
     args = parser.parse_args()
 
     importer = DataImporter()
 
     try:
-        if args.import_:
+        if args.import_data:
             importer.import_all()
         elif args.review:
             importer.review_pending()

@@ -72,23 +72,18 @@ def _load_report_nodes():
 # ==================== BM25Okapi 纯 Python 实现 ====================
 
 def _tokenize_chinese(text):
-    """简单的中文分词：中文单字、英文/数字按空格切分"""
+    """中文分词：结巴分词，中文词保留，英文数字按原样"""
+    import jieba
+    words = jieba.lcut(text)
     tokens = []
-    buf = []
-    for ch in text:
-        if '\u4e00' <= ch <= '\u9fff' or '\u3000' <= ch <= '\u303f':
-            if buf:
-                tokens.extend(buf)
-                buf = []
-            tokens.append(ch)
-        elif ch.isalnum() or ch in ('-', '_', '.', '%'):
-            buf.append(ch)
+    for w in words:
+        w = w.strip()
+        if not w:
+            continue
+        if any('\u4e00' <= c <= '\u9fff' for c in w):
+            tokens.append(w)
         else:
-            if buf:
-                tokens.append(''.join(buf).lower())
-                buf = []
-    if buf:
-        tokens.append(''.join(buf).lower())
+            tokens.append(w.lower())
     return tokens
 
 
@@ -370,7 +365,7 @@ class RAGRetriever:
     # ==================== Chunks Index (Phase 2) ====================
     def load_chunks_index(self):
         """加载新版 chunks.json 的 FAISS + BM25 + 元数据索引"""
-        fdir = os.path.join(BASE_DIR, "data", "rag_index")
+        fdir = os.path.join(BASE_DIR, "models", "rag_index")
         fpath = os.path.join(fdir, "faiss.index")
         bpath = os.path.join(fdir, "bm25.pkl")
         mpath = os.path.join(fdir, "index_meta.json")
@@ -415,9 +410,9 @@ class RAGRetriever:
         result["chunks"] = self.search_chunks_hybrid(query, top_k)
         return result
 
-    # ==================== ???????? (Phase 2) ====================
+    # ==================== MySQL 元数据预过滤 (Phase 2) ====================
     def _init_mysql(self):
-        """??? MySQL ???????????"""
+        """初始化 MySQL 连接用于元数据预过滤"""
         try:
             from rag_pipeline.config import DB_CONFIG
             self.mysql_conn = pymysql.connect(**DB_CONFIG)
@@ -428,20 +423,41 @@ class RAGRetriever:
             self._mysql_ready = False
 
     def retrieve(self, query, company=None, year=None, top_k=20):
-        """????????
+        """带元数据预过滤的检索
         Args:
-            query: ????
-            company: ???????
-            year: ??????
-            top_k: ????
+            query: 查询文本
+            company: 公司名（可选）
+            year: 年份（可选）
+            top_k: 返回数量
         """
         valid_ids = self._get_valid_ids(company, year)
+        # MySQL预过滤失败时，用内存过滤
+        if valid_ids is None and (company or year):
+            valid_ids = self._get_valid_ids_memory(company, year)
+            if valid_ids is None:
+                # 指定了过滤条件但无匹配 → 空结果
+                return []
         faiss_results = self._faiss_search(query, valid_ids, top_k)
         bm25_results = self._bm25_search(query, valid_ids, top_k)
         return self._rrf_merge(faiss_results, bm25_results)
 
+    def _get_valid_ids_memory(self, company=None, year=None):
+        """从index_meta.json内存过滤符合条件的chunk id"""
+        if not hasattr(self, "chunks_meta") or not self.chunks_meta:
+            return None
+        ids = []
+        for i, m in enumerate(self.chunks_meta):
+            if company and m.get("company", "") != company:
+                continue
+            if year and str(m.get("year", "")) != str(year):
+                continue
+            ids.append(i)
+        if not ids:
+            print(f"[RAG] memory filter: no chunks for company={company} year={year}")
+        return ids if ids else None
+
     def _get_valid_ids(self, company=None, year=None):
-        """?MySQL???????chunk id??"""
+        """从MySQL获取符合条件的chunk id列表"""
         if not company and not year:
             return None
         if not self._mysql_ready:
@@ -453,14 +469,19 @@ class RAGRetriever:
         if year:
             conds.append("year = %s"); params.append(year)
         sql = "SELECT id FROM rag_chunks WHERE " + " AND ".join(conds) + " ORDER BY id"
-        self.cursor.execute(sql, params)
-        ids = [r[0] for r in self.cursor.fetchall()]
-        if not ids:
-            print(f"[RAG] no chunks: company={company} year={year}")
-        return ids
+        try:
+            self.cursor.execute(sql, params)
+            ids = [r[0] for r in self.cursor.fetchall()]
+            if not ids:
+                print(f"[RAG] no chunks: company={company} year={year}")
+            return ids
+        except Exception as e:
+            print(f"[RAG] MySQL query failed: {e}, skip pre-filter")
+            self._mysql_ready = False
+            return None
 
     def _faiss_search(self, query, valid_ids, top_k):
-        """FAISS???????IDSelector??"""
+        """FAISS 检索，支持 IDSelector 过滤"""
         q_vec = self.embedder.encode([query], normalize_embeddings=True).astype(np.float32)
         if valid_ids is not None and len(valid_ids) > 0:
             sel = faiss.IDSelectorArray(np.array(valid_ids, dtype=np.int64))
@@ -471,13 +492,13 @@ class RAGRetriever:
         return [{"id": int(idx), "score": float(s)} for idx, s in zip(indices[0], scores[0]) if idx >= 0]
 
     def _bm25_search(self, query, valid_ids, top_k):
-        """BM25???????????valid_ids"""
+        """BM25 检索，可选按 valid_ids 过滤"""
         bm25_raw = self.chunks_bm25.search(query, top_k=top_k * 5)
         valid_set = set(valid_ids) if valid_ids else None
         return [{"id": idx, "score": s} for idx, s in bm25_raw if valid_set is None or idx in valid_set][:top_k]
 
     def _rrf_merge(self, faiss_results, bm25_results, k=60):
-        """RRF??????"""
+        """RRF 融合排序"""
         scores = {}
         for r, item in enumerate(faiss_results):
             scores[item["id"]] = scores.get(item["id"], 0) + 1.0 / (k + r + 1)
@@ -497,13 +518,13 @@ class RAGRetriever:
         texts = [c.get("text","")[:200] for c in candidates]
         if not texts:
             return candidates[:top_k]
-        pairs = ["?????????????[??] %s [??] %s" % (query, t) for t in texts]
+        pairs = ["为这个句子生成表示以用于检索相关文章：query: %s passage: %s" % (query, t) for t in texts]
         try:
             import numpy as np
             import requests
             r = requests.post("http://localhost:11434/api/embed", json={"model": "bge-m3", "input": pairs}, timeout=60)
             embs = np.array(r.json()["embeddings"], dtype=np.float32)
-            r2 = requests.post("http://localhost:11434/api/embed", json={"model": "bge-m3", "input": ["?????????????[??] %s [??]" % query]}, timeout=60)
+            r2 = requests.post("http://localhost:11434/api/embed", json={"model": "bge-m3", "input": ["为这个句子生成表示以用于检索相关文章：query: %s" % query]}, timeout=60)
             q_emb = np.array(r2.json()["embeddings"][0], dtype=np.float32)
             scores = embs @ q_emb / (np.linalg.norm(embs, axis=1) * np.linalg.norm(q_emb) + 1e-10)
             order = np.argsort(-scores)
@@ -536,15 +557,14 @@ if __name__ == "__main__":
     for q in questions:
         print("\n" + "=" * 60)
         print("Query:", q)
-        result = rag.search_all(q, top_k=3)
+        results = rag.search_chunks_hybrid(q, top_k=3)
 
-        print("--- Reports ---")
-        for r in result["reports"]:
-            print(f"  [{r['score']:.3f}] {r['file_name'][:50]}")
-            print(f"    {r['text'][:120]}...")
-
-        print("--- Financial KB ---")
-        for r in result["financial_kb"]:
-            print(f"  [{r['score']:.3f}] {r['text'][:150]}")
+        for i, r in enumerate(results):
+            meta = r.get("meta", {})
+            company = meta.get("company", "?")
+            section = meta.get("section", "?")
+            year = meta.get("year", "?")
+            print(f"  [{i}] score={r['score']:.4f} | {company} | {year} | {section}")
+            print(f"    {r['text'][:150]}...")
 
     print("\nTest done!")
