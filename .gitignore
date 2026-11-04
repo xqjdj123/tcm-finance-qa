@@ -1,0 +1,172 @@
+﻿# ================================
+# Python
+# ================================
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# ================================
+# 开发调试脚本（_开头 = 一次性脚本）
+# ================================
+_check*.py
+_fix*.py
+_fix*.b64
+_read_*.py
+_gen_*.py
+_dump_*.py
+_mysql_*.py
+_review_*.py
+_update_*.py
+_verify*.py
+_test_*.py
+_test_*.b64
+
+# ================================
+# 输出文件
+# ================================
+*.txt
+*.b64
+
+# 例外：这两类 .txt 是项目必需文件，不能被上面的通配吞掉
+#   - requirements.txt            依赖清单（标准工程文件）
+#   - **/vocab.txt                模型 tokenizer 词表（models/ 下 config/tokenizer
+#                                 元数据已入库，若词表缺失则仓库中模型元数据不完整）
+!requirements.txt
+!**/vocab.txt
+
+# ================================
+# IDE / Editor
+# ================================
+.idea/
+*.iml
+*.xml
+.vscode/
+.history/
+
+# ================================
+# 版权研报 & 财报原文（不上传）
+# ================================
+data/研报总MD/
+data/附件2：财务报告/
+data/附件5：研报数据/
+
+# ================================
+# 提取结果JSON（1039个文件，太多）
+# ================================
+data/extracted/
+
+# ================================
+# 大型数据缓存（可重建）
+# ================================
+data/rag_index/
+data/chunks.json
+data/nodes.pkl
+data/faiss_index.bin
+data/mapping_history.json
+data/synonym_pool.json
+data/schema_columns.json.bak
+data/index_meta.json
+data/train_data.json
+
+# ================================
+# 模型训练文件（大文件 & 可重建）
+# ================================
+models/rag_index/
+# 二阶段精排 cross-encoder 权重（2026-09-16 补做，BAAI/bge-reranker-base，
+# 约 1.11GB，经 ModelScope 获取；小文件也不入库，按需重新拉取）
+models/reranker_bge_base/
+*.bin
+*.pkl
+*.pt
+*.pth
+*.safetensors
+*.rar
+*.zip
+
+# ================================
+# 模型自动生成文档
+# ================================
+models/model1_schema_linking/output/README.md
+
+# ================================
+# 第三方依赖库
+# ================================
+pdf_extractor/lib/
+
+
+# ================================
+# 一次性调试脚本（仅限仓库根目录，加 / 前缀避免误伤 tests/ 与 verify/）
+# ================================
+/check_*.py
+/test_*.py
+/verify_*.py
+/debug_*.py
+/reimport*.py
+/analyze_failures*.py
+/read_excel*.py
+/fix_*.py
+/run*batch*.py
+/batch_process.py
+/compare_data.py
+/cleanup_tables.py
+/create_core_table.py
+/drop_tables.py
+/patch_agent.py
+/review_pending.py
+/h
+/results/
+/backup_*.json
+/data/schema_columns.json
+/data/mapping_history.json
+
+# 0 字节残留占位文件（2026-08-17 遗留，非正式代码）
+/pdf_extractor/check_quality.py
+
+# ================================
+# 系统 / 环境
+# ================================
+CACHEDIR.TAG
+.DS_Store
+Thumbs.db
+
+# ================================
+# 凭据（真实值不入库，模板见 config/config.example.yaml）
+# ================================
+config/config.yaml
+.env
+
+# ================================
+# 运行时日志 / 本地快照
+# ================================
+logs/
+data/logs/
+
+# ================================
+# 论文原文派生文本（体积 & 版权）
+# ================================
+paper_texts/
+pdf_texts/
+论文清单/
+
+# ================================
+# 个人论文/答辩材料（含学号姓名，公开仓库不入库）
+# ================================
+doc/开题报告-*
+doc/开题报告*
+doc/开题答辩*
+doc/答辩*
+doc/毕业设计收尾清单-*
+doc/make_ppt.py
+开题报告-*
+开题答辩PPT-*
+毕业论文-*
+gen_thesis.py
+output/
+
+# ================================
+# 工具工作目录（会话日志 / 临时脚本，非项目代码）
+# ================================
+.workbuddy/

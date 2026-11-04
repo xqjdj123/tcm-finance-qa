@@ -1,0 +1,69 @@
+# ============================================================
+# TCM-Finance-QA 依赖清单
+# 中药企业财务问答 Agent（毕业设计）
+#
+# 采集方式：2026-09-14 用 pip list --format=freeze 实测三个环境，
+#           本文件列出的是**代码 import 到的直接依赖**（非传递依赖）。
+#           版本写为下限 + 注释已测值，因为三环境实测值不一致，
+#           强行锁定单一版本会与事实不符。
+#
+# ⚠️ 现状：目前没有任何一个环境能跑全部功能（这是已知的交付缺口）
+#
+#   环境        解释器                     能跑            缺什么
+#   ----------- -------------------------- -------------- --------------------------------------
+#   .venv       Python 3.11.5              RAG 索引/检索   flask / jieba / pymysql / python-docx / pytest
+#   pytorch_cpu conda env, Python 3.9.25    Agent/评测/Web  faiss  → RAG 检索跑不了
+#   anacond     Python 3.11.5              pytest 单测     faiss
+#
+#   论文第四章四项指标由 pytorch_cpu 产出；RAG 校验用 .venv；95 单测用 anacond。
+#   三者版本差异较大（transformers 5.9.0 vs 4.57.6；numpy 2.4.4 vs 1.26.x；
+#   torch 2.5.1 vs 2.8.0+cpu），**换环境可能改变模型输出**，重跑前需先对齐。
+#
+# 建议（收尾项）：合并到 Python 3.10 单环境 → 重跑评测确认数字不变 →
+#   再以此声明论文的"可复现环境"。
+#
+# 安装：
+#   python -m venv .venv
+#   .venv\Scripts\pip install -r requirements.txt
+# ============================================================
+
+
+# ---------- 核心：ReAct 引擎 / LLM 调用 / 配置 ----------
+requests>=2.31.0                  # 已测 .venv 2.34.2 / pytorch_cpu 2.31.0
+PyYAML>=6.0                       # 已测 6.0.3（三环境一致）
+mysql-connector-python>=9.4.0     # 已测 pytorch_cpu 9.4.0 / .venv 9.7.0 —— 工具层主连接驱动（sql/report/risk_tool）
+PyMySQL>=1.1.0                    # 已测 pytorch_cpu 1.2.0 / anacond 1.1.0 —— 部分数据脚本与 verify 使用
+python-dotenv>=1.0.0              # 已测 pytorch_cpu 1.2.1 / anacond 1.0.0 —— 加载仓库根 .env（agent/config.py）
+                                  # 注：**可选依赖**。未安装时 config.py 自动回退到内置极简解析器，功能不缺失。
+
+# ---------- 模型推理：Model2 问题理解 + NER ----------
+torch>=2.5.1                      # 已测 .venv 2.5.1 / pytorch_cpu 2.8.0+cpu（CPU 足够，无 GPU 依赖）
+transformers>=4.57.6              # ⚠️ 已测 pytorch_cpu 4.57.6 与 .venv 5.9.0，跨大版本，改版必须重测
+numpy>=1.26.0                     # 已测 pytorch_cpu 1.26.2 / anacond 1.26.4；.venv 为 2.4.4，注意与 torch 的兼容
+jieba>=0.42.1                     # 已测 0.42.1（rag_pipeline 分词）
+tqdm>=4.67.0                      # 已测 4.67.3 / 4.68.1（建索引进度条）
+
+# ---------- RAG 检索 ----------
+faiss-cpu>=1.7.4                  # 已测 .venv 1.14.2（当前唯一装了 faiss 的环境）
+                                  # 注：BM25 为项目自研 rag_module.BM25Okapi，不需要 rank_bm25
+
+# ---------- Web 服务（app.py / verify_app_smoke.py）----------
+Flask>=3.1.3                      # 已测 pytorch_cpu 3.1.3
+
+# ---------- 数据层：PDF / Excel 抽取与建库 ----------
+pdfplumber>=0.11.8                # 已测 .venv 0.11.9 / pytorch_cpu 0.11.8
+pdfminer.six>=20221105            # pdfplumber 的底层依赖；注：pdf_extractor/lib 下有 vendored 副本
+pillow>=10.4.0                    # 已测 .venv 12.2.0 / pytorch_cpu 10.4.0
+pypdfium2>=5.8.0                  # 已测 .venv 5.8.0 / pytorch_cpu 5.12.1
+pandas>=2.3.0                     # 已测 .venv 3.0.3 / pytorch_cpu 2.3.3
+openpyxl>=3.1.2                   # 已测 3.1.5 / 3.1.2（Excel 读写）
+cryptography>=48.0.0              # 已测 48.0.0 / 48.0.1（MySQL 认证链路）
+
+# ---------- 训练与模型评测 ----------
+datasets>=2.12.0                  # 已测 anacond 2.12.0（train_model2.py）
+seqeval                           # ⚠️ 三个环境均未安装，但 eval_ner.py import 了它 —— 该脚本未在本机验证过
+
+# ---------- 开发 / 交付 ----------
+pytest>=7.4.0                     # 已测 anacond 7.4.0 —— 跑 tests/ 的 95 个用例
+matplotlib>=3.9.0                 # 已测 3.9.4 / 3.10.9（data_quality_report.py 出图）
+python-docx>=1.2.0                # 已测 pytorch_cpu 1.2.0（doc/build_kaiti_docx.py 生成文档）

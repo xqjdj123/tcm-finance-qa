@@ -1,0 +1,636 @@
+{
+  "tables": {
+    "balance_sheet": {
+      "table_name_cn": "资产负债表",
+      "description": "资产负债表，反映公司在报告期末的资产、负债和所有者权益状况",
+      "columns": [
+        {
+          "en": "asset_cash_and_cash_equivalents",
+          "cn": "货币资金",
+          "desc": "货币资金，包括库存现金、银行存款和其他货币资金",
+          "aliases": [
+            "现金",
+            "现金及现金等价物",
+            "货币资金余额"
+          ]
+        },
+        {
+          "en": "asset_accounts_receivable",
+          "cn": "应收账款",
+          "desc": "应收账款，公司因销售商品或提供劳务而应向客户收取的款项",
+          "aliases": [
+            "应收款",
+            "应收",
+            "应收款项"
+          ]
+        },
+        {
+          "en": "asset_inventory",
+          "cn": "存货",
+          "desc": "存货，公司持有的原材料、在产品、产成品等",
+          "aliases": [
+            "库存",
+            "存货余额"
+          ]
+        },
+        {
+          "en": "asset_trading_financial_assets",
+          "cn": "交易性金融资产",
+          "desc": "交易性金融资产，公司为交易目的持有的金融资产",
+          "aliases": [
+            "交易性金融资产",
+            "短期投资"
+          ]
+        },
+        {
+          "en": "asset_construction_in_progress",
+          "cn": "在建工程",
+          "desc": "在建工程，公司正在建设的工程项目",
+          "aliases": [
+            "在建项目",
+            "工程投入"
+          ]
+        },
+        {
+          "en": "asset_total_assets",
+          "cn": "资产总计",
+          "desc": "资产总计，公司拥有或控制的所有资产总额",
+          "aliases": [
+            "总资产",
+            "资产总额",
+            "全部资产"
+          ]
+        },
+        {
+          "en": "asset_total_assets_yoy_growth",
+          "cn": "总资产同比增长率",
+          "desc": "总资产同比增长率",
+          "aliases": [
+            "总资产同比",
+            "资产同比",
+            "总资产增速"
+          ]
+        },
+        {
+          "en": "liability_accounts_payable",
+          "cn": "应付账款",
+          "desc": "应付账款，公司因采购商品或接受劳务而应支付给供应商的款项",
+          "aliases": [
+            "应付款",
+            "应付",
+            "应付货款"
+          ]
+        },
+        {
+          "en": "liability_advance_from_customers",
+          "cn": "预收账款",
+          "desc": "预收账款，公司向客户预收的款项（新准则后多为合同负债）",
+          "aliases": [
+            "预收款",
+            "预收"
+          ]
+        },
+        {
+          "en": "liability_contract_liabilities",
+          "cn": "合同负债",
+          "desc": "合同负债，公司已收或应收客户对价而应向客户转让商品的义务",
+          "aliases": [
+            "合同负债"
+          ]
+        },
+        {
+          "en": "liability_short_term_loans",
+          "cn": "短期借款",
+          "desc": "短期借款，公司向银行或其他金融机构借入的期限在一年以内的借款",
+          "aliases": [
+            "短贷",
+            "短期贷款",
+            "一年内到期借款"
+          ]
+        },
+        {
+          "en": "liability_total_liabilities",
+          "cn": "负债合计",
+          "desc": "负债合计，公司承担的各类债务总额",
+          "aliases": [
+            "总负债",
+            "负债总额"
+          ]
+        },
+        {
+          "en": "liability_total_liabilities_yoy_growth",
+          "cn": "负债合计同比增长率",
+          "desc": "负债合计同比增长率",
+          "aliases": [
+            "总负债同比",
+            "负债同比",
+            "负债增速"
+          ]
+        },
+        {
+          "en": "asset_liability_ratio",
+          "cn": "资产负债率",
+          "desc": "资产负债率，总负债/总资产，反映公司财务杠杆水平",
+          "aliases": [
+            "负债率",
+            "杠杆率",
+            "资产负债比"
+          ]
+        },
+        {
+          "en": "equity_unappropriated_profit",
+          "cn": "未分配利润",
+          "desc": "未分配利润，公司历年累积的未分配利润",
+          "aliases": [
+            "留存收益",
+            "累计利润"
+          ]
+        },
+        {
+          "en": "equity_total_equity",
+          "cn": "所有者权益合计",
+          "desc": "所有者权益合计，公司股东享有的净资产总额",
+          "aliases": [
+            "股东权益",
+            "净资产",
+            "权益总额"
+          ]
+        }
+      ]
+    },
+    "income_sheet": {
+      "table_name_cn": "利润表",
+      "description": "利润表，反映公司报告期内的经营成果",
+      "columns": [
+        {
+          "en": "total_operating_revenue",
+          "cn": "营业总收入",
+          "desc": "营业总收入，公司报告期内日常经营活动实现的全部收入总额",
+          "aliases": [
+            "营收",
+            "营业收入",
+            "总收入",
+            "主营业务收入",
+            "销售收入"
+          ]
+        },
+        {
+          "en": "operating_expense_cost_of_sales",
+          "cn": "营业成本",
+          "desc": "营业成本，公司为销售商品或提供劳务所发生的直接成本",
+          "aliases": [
+            "销售成本",
+            "主营业务成本",
+            "成本"
+          ]
+        },
+        {
+          "en": "operating_expense_selling_expenses",
+          "cn": "销售费用",
+          "desc": "销售费用，公司为销售商品发生的各项费用",
+          "aliases": [
+            "营销费用",
+            "销售支出",
+            "推广费"
+          ]
+        },
+        {
+          "en": "operating_expense_administrative_expenses",
+          "cn": "管理费用",
+          "desc": "管理费用，公司为组织和管理生产经营活动发生的费用",
+          "aliases": [
+            "行政费用",
+            "管理支出",
+            "办公费用"
+          ]
+        },
+        {
+          "en": "operating_expense_financial_expenses",
+          "cn": "财务费用",
+          "desc": "财务费用，公司为筹集生产经营资金而发生的费用",
+          "aliases": [
+            "利息支出",
+            "利息费用",
+            "融资费用"
+          ]
+        },
+        {
+          "en": "operating_expense_rnd_expenses",
+          "cn": "研发费用",
+          "desc": "研发费用，公司为研发新产品、新技术而发生的费用",
+          "aliases": [
+            "研发支出",
+            "研发投入",
+            "研发开支",
+            "R&D"
+          ]
+        },
+        {
+          "en": "operating_expense_taxes_and_surcharges",
+          "cn": "税金及附加",
+          "desc": "税金及附加，公司经营活动应负担的各项税费",
+          "aliases": [
+            "税金",
+            "附加税",
+            "税费"
+          ]
+        },
+        {
+          "en": "total_operating_expenses",
+          "cn": "营业总成本",
+          "desc": "营业总成本，公司报告期内日常经营活动的全部成本费用总额",
+          "aliases": [
+            "总成本",
+            "成本合计",
+            "营业总支出"
+          ]
+        },
+        {
+          "en": "operating_profit",
+          "cn": "营业利润",
+          "desc": "营业利润，公司通过日常经营活动获得的利润",
+          "aliases": [
+            "营业利润",
+            "经营利润"
+          ]
+        },
+        {
+          "en": "total_profit",
+          "cn": "利润总额",
+          "desc": "利润总额，公司报告期内实现的全部利润",
+          "aliases": [
+            "税前利润",
+            "会计利润",
+            "总利润"
+          ]
+        },
+        {
+          "en": "net_profit",
+          "cn": "净利润",
+          "desc": "净利润，公司报告期内实现的最终盈利",
+          "aliases": [
+            "归母净利润",
+            "净利",
+            "纯利",
+            "赚了多少",
+            "亏损额"
+          ]
+        },
+        {
+          "en": "asset_impairment_loss",
+          "cn": "资产减值损失",
+          "desc": "资产减值损失，公司计提的各项资产减值准备",
+          "aliases": [
+            "资产减值",
+            "减值损失"
+          ]
+        },
+        {
+          "en": "credit_impairment_loss",
+          "cn": "信用减值损失",
+          "desc": "信用减值损失，公司计提的信用减值准备",
+          "aliases": [
+            "信用减值",
+            "坏账准备",
+            "坏账损失"
+          ]
+        },
+        {
+          "en": "other_income",
+          "cn": "其他收益",
+          "desc": "其他收益，公司与日常经营活动相关的政府补助等",
+          "aliases": [
+            "其他收入",
+            "政府补助"
+          ]
+        }
+      ]
+    },
+    "cash_flow_sheet": {
+      "table_name_cn": "现金流量表",
+      "description": "现金流量表，反映公司报告期内现金及现金等价物的流入和流出情况",
+      "columns": [
+        {
+          "en": "net_cash_flow",
+          "cn": "净现金流",
+          "desc": "净现金流，即现金及现金等价物净增加额",
+          "aliases": [
+            "现金净流量",
+            "净现金",
+            "现金流净额"
+          ]
+        },
+        {
+          "en": "net_cash_flow_yoy_growth",
+          "cn": "净现金流同比增长率",
+          "desc": "净现金流同比增长率",
+          "aliases": [
+            "净现金流同比",
+            "现金同比",
+            "现金流增速"
+          ]
+        },
+        {
+          "en": "operating_cf_net_amount",
+          "cn": "经营性现金流净额",
+          "desc": "经营性现金流净额，公司日常经营活动产生的现金流入与流出差额",
+          "aliases": [
+            "经营现金流",
+            "经营活动现金流",
+            "经营性现金流"
+          ]
+        },
+        {
+          "en": "operating_cf_ratio_of_net_cf",
+          "cn": "经营性现金流占比",
+          "desc": "经营性现金流占净现金流的比例",
+          "aliases": [
+            "经营现金流占比",
+            "经营现金比例"
+          ]
+        },
+        {
+          "en": "operating_cf_cash_from_sales",
+          "cn": "经营性现金流入",
+          "desc": "经营性现金流入，公司通过销售商品实际收到的现金",
+          "aliases": [
+            "经营现金流入",
+            "销售回款",
+            "收现"
+          ]
+        },
+        {
+          "en": "investing_cf_net_amount",
+          "cn": "投资性现金流净额",
+          "desc": "投资性现金流净额，公司投资活动产生的现金流入与流出差额",
+          "aliases": [
+            "投资现金流",
+            "投资活动现金流",
+            "投资性现金流"
+          ]
+        },
+        {
+          "en": "investing_cf_ratio_of_net_cf",
+          "cn": "投资性现金流占比",
+          "desc": "投资性现金流占净现金流的比例",
+          "aliases": [
+            "投资现金流占比",
+            "投资现金比例"
+          ]
+        },
+        {
+          "en": "investing_cf_cash_for_investments",
+          "cn": "投资性现金流出",
+          "desc": "投资性现金流出，公司进行投资活动所支付的现金",
+          "aliases": [
+            "投资支出",
+            "投资付现",
+            "资本支出"
+          ]
+        },
+        {
+          "en": "investing_cf_cash_from_investment_recovery",
+          "cn": "投资性现金流入",
+          "desc": "投资性现金流入，公司收回前期投资所收到的现金",
+          "aliases": [
+            "投资收回",
+            "收回投资"
+          ]
+        },
+        {
+          "en": "financing_cf_cash_from_borrowing",
+          "cn": "融资性现金流入",
+          "desc": "融资性现金流入，公司通过借款方式取得的现金",
+          "aliases": [
+            "融资流入",
+            "借款流入",
+            "取得借款"
+          ]
+        },
+        {
+          "en": "financing_cf_cash_for_debt_repayment",
+          "cn": "融资性现金流出",
+          "desc": "融资性现金流出，公司偿还前期借款所支付的现金",
+          "aliases": [
+            "融资流出",
+            "还款流出",
+            "偿还债务"
+          ]
+        },
+        {
+          "en": "financing_cf_net_amount",
+          "cn": "融资性现金流净额",
+          "desc": "融资性现金流净额，公司融资活动产生的现金流入与流出差额",
+          "aliases": [
+            "融资现金流",
+            "筹资现金流",
+            "融资性现金流"
+          ]
+        },
+        {
+          "en": "financing_cf_ratio_of_net_cf",
+          "cn": "融资性现金流占比",
+          "desc": "融资性现金流占净现金流的比例",
+          "aliases": [
+            "融资现金流占比",
+            "融资比例"
+          ]
+        }
+      ]
+    },
+    "core_performance_indicators_sheet": {
+      "table_name_cn": "核心业绩指标表",
+      "description": "核心业绩指标表，包含每股指标、盈利能力、成长能力等",
+      "columns": [
+        {
+          "en": "total_share_capital",
+          "cn": "总股本",
+          "desc": "总股本，公司发行在外的普通股股份总数",
+          "aliases": [
+            "股本",
+            "总股份",
+            "股数"
+          ]
+        },
+        {
+          "en": "eps",
+          "cn": "每股收益",
+          "desc": "每股收益，反映普通股股东每持有一股所能享有的企业净利润",
+          "aliases": [
+            "每股盈利",
+            "EPS",
+            "每股利润"
+          ]
+        },
+        {
+          "en": "total_operating_revenue",
+          "cn": "营业总收入",
+          "desc": "营业总收入，公司报告期内实现的全部营业收入",
+          "aliases": [
+            "营收",
+            "营业收入",
+            "总收入"
+          ]
+        },
+        {
+          "en": "net_profit",
+          "cn": "净利润",
+          "desc": "净利润，公司报告期内实现的最终盈利",
+          "aliases": [
+            "归母净利润",
+            "净利"
+          ]
+        },
+        {
+          "en": "operating_revenue_yoy_growth",
+          "cn": "营业总收入同比增长率",
+          "desc": "营业总收入同比增长率，本期营收较上年同期的变动比例",
+          "aliases": [
+            "营收同比增速",
+            "营收同比增长",
+            "收入增长",
+            "同比收入"
+          ]
+        },
+        {
+          "en": "operating_revenue_qoq_growth",
+          "cn": "营业总收入季度环比增长率",
+          "desc": "营业总收入季度环比增长率",
+          "aliases": [
+            "营收环比",
+            "营收季度环比",
+            "收入环比"
+          ]
+        },
+        {
+          "en": "net_profit_yoy_growth",
+          "cn": "净利润同比增长率",
+          "desc": "净利润同比增长率，本期净利润较上年同期的变动比例",
+          "aliases": [
+            "净利润同比",
+            "净利同比",
+            "利润同比",
+            "净利增速"
+          ]
+        },
+        {
+          "en": "net_profit_qoq_growth",
+          "cn": "净利润季度环比增长率",
+          "desc": "净利润季度环比增长率",
+          "aliases": [
+            "净利润环比",
+            "净利环比"
+          ]
+        },
+        {
+          "en": "net_asset_per_share",
+          "cn": "每股净资产",
+          "desc": "每股净资产，归属于上市公司股东的净资产除以总股本",
+          "aliases": [
+            "每股净值",
+            "每股权益"
+          ]
+        },
+        {
+          "en": "roe",
+          "cn": "净资产收益率",
+          "desc": "净资产收益率，衡量公司运用净资产盈利的能力",
+          "aliases": [
+            "ROE",
+            "股东回报率",
+            "资本回报率"
+          ]
+        },
+        {
+          "en": "operating_cf_per_share",
+          "cn": "每股经营现金流",
+          "desc": "每股经营现金流，经营活动产生的现金流量净额除以总股本",
+          "aliases": [
+            "每股现金流",
+            "每股经营现金"
+          ]
+        },
+        {
+          "en": "net_profit_excl_non_recurring",
+          "cn": "扣非净利润",
+          "desc": "扣非净利润，剔除非经常性损益后的净利润",
+          "aliases": [
+            "扣非净利",
+            "扣非",
+            "经常性净利润"
+          ]
+        },
+        {
+          "en": "net_profit_excl_non_recurring_yoy",
+          "cn": "扣非净利润同比增长率",
+          "desc": "扣非净利润同比增长率",
+          "aliases": [
+            "扣非净利润同比",
+            "扣非同比",
+            "扣非利润增速"
+          ]
+        },
+        {
+          "en": "gross_profit_margin",
+          "cn": "销售毛利率",
+          "desc": "销售毛利率，(营业总收入-营业成本)/营业总收入",
+          "aliases": [
+            "毛利率",
+            "毛利占比",
+            "毛利率"
+          ]
+        },
+        {
+          "en": "net_profit_margin",
+          "cn": "销售净利率",
+          "desc": "销售净利率，净利润/营业总收入",
+          "aliases": [
+            "净利率",
+            "净利占比"
+          ]
+        },
+        {
+          "en": "roe_weighted_excl_non_recurring",
+          "cn": "加权平均净资产收益率",
+          "desc": "加权平均净资产收益率，依据扣非净利润计算",
+          "aliases": [
+            "加权ROE",
+            "平均净资产收益率"
+          ]
+        }
+      ]
+    },
+    "income_statement": {
+      "table_name_cn": "利润简表(income_statement)",
+      "description": "利润简表，包含营收、利润总额、净利润",
+      "columns": [
+        {
+          "en": "total_operating_revenue",
+          "cn": "营业总收入",
+          "desc": "营业总收入",
+          "aliases": [
+            "营收",
+            "营业收入"
+          ]
+        },
+        {
+          "en": "total_profit",
+          "cn": "利润总额",
+          "desc": "利润总额",
+          "aliases": [
+            "税前利润"
+          ]
+        },
+        {
+          "en": "net_profit",
+          "cn": "净利润",
+          "desc": "净利润",
+          "aliases": [
+            "净利",
+            "归母净利润"
+          ]
+        }
+      ]
+    }
+  }
+}

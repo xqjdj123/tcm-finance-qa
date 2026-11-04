@@ -1,0 +1,108 @@
+# ============================================================
+# codex 财务问答 Agent 统一配置文件（模板）
+# 复制为 config.yaml 并填写真实值；也可用环境变量覆盖：
+#   DEEPSEEK_API_KEY / DEEPSEEK_MODEL / DB_HOST / DB_PORT / DB_NAME /
+#   DB_USER / DB_PASSWORD / PORT / DEBUG / RAG_LLM_REWRITE
+# config.yaml 已在 .gitignore 中，不会入库
+#
+# 【2026-09 配置治理】下列每个键都由 `verify/verify_no_hardcode.py` 校验：
+# 键要么被代码真实读取（已标注），要么列入"未接线白名单"。杜绝"假配置"。
+# ============================================================
+
+llm:
+  api_key: "<YOUR_DEEPSEEK_API_KEY>"
+  api_url: "https://api.deepseek.com/v1"
+  model: "deepseek-chat"
+  # ---- 以下键均已接线（消费者：agent/llm.py）----
+  temperature: 0.1               # 采样温度（评测口径用 0.1）
+  max_tokens: 2048
+  timeout: 30                    # 纯文本调用超时（秒）
+  timeout_tools: 60              # Function Calling 调用超时（秒）
+  max_retries: 2
+
+agent:
+  # ---- 以下键均已接线（读得到、改得动）----
+  max_iterations: 8              # 硬上限（engine.MAX_STEPS）
+  conversation_history_turns: 3  # 注入 LLM 的最近轮数
+  history_truncate_chars: 500    # 单轮答案入历史前的截断字符
+  history_llm_answer_chars: 300  # 注入 LLM 时历史"助手"消息再截断字符
+  soft_iteration_limit: 5        # 软上限：到此轮次触发收敛评估
+  tool_result_budget: 12000      # 注入 LLM 的工具结果字符预算（engine 读取；P3 防名单截断）
+  call_dedup: true               # D2 重复调用拦截
+  failed_call_max_retry: 1       # D3 失败调用最大重试次数
+  evaluator_enabled: true        # D1 收敛评估器
+
+  # ---- 阶段2：CoverageAuditor 覆盖审计（D10，阶段2 扩展；读得到、改得动）----
+  # 评测可临时用环境变量 WB_COVERAGE_AUDIT=0 关审计做对照，不必改本文件。
+  coverage_audit_enabled: true      # 收敛前独立覆盖审计（engine 装配 agent/coverage.py）
+  coverage_audit_max_rounds: 1      # 单次运行最多审计打回次数（防死循环）
+  coverage_audit_min_tool_calls: 0  # P2：0 次工具调用（如纯追问）也必须过审计（0=总是）
+
+  # ---- 预留：三期能力，**当前代码未实现**，改这里不会有任何效果 ----
+  # 故意注释掉，避免出现"看起来能调其实调不了"的假配置。
+  # 详见 doc/毕业设计冲刺计划-20260913.md §9.3 C3 / §5 明确不做清单。
+  # tool_timeout_seconds: 20
+  # total_budget_seconds: 60
+  # parallel_independent_tools: true
+
+server:
+  host: "127.0.0.1"
+  port: 7860                     # app.py 读取；环境变量 PORT 可覆盖
+  debug: false                   # 环境变量 DEBUG 可覆盖
+
+rag:
+  # 查询改写是否使用真 LLM（消费者：domain/retriever/hybrid.py）
+  # false（默认）= 只用 normalize_query（去语气词 + 补公司名，零成本）；
+  # true          = 调 LLM 改写，失败/超时自动回退到 normalize_query
+  #                 （底层 LLMClient 超时 30s，会显著增加 rag_search 延迟，
+  #                   启用前请用数据论证收益）。环境变量 RAG_LLM_REWRITE 可覆盖。
+  llm_rewrite: false
+
+retriever:
+  # ---- 以下键均已接线（消费者：domain/retriever/hybrid.py + rag_module.py）----
+  rrf_k: 60                        # RRF 融合常数 k
+  fusion_top_k: 5                  # 融合后默认保留条数
+  company_boost: 2.0               # 命中 company 的 chunk 分数倍数
+  candidate_multiplier: 4          # 有 company 时的候选池倍数
+  channel_candidate_multiplier: 3  # 单通道(BM25/FAISS)候选池 = top_k × 该倍数
+  # ---- 二阶段精排 cross-encoder（消费者：domain/retriever/rerank.py + hybrid.py）----
+  rerank: "off"                    # off=不精排（默认）| ce=纯 cross-encoder | ce_fuse=与RRF加权融合
+  rerank_pool_mult: 4              # 精排候选池 = top_k × 该倍数
+  rerank_alpha: 0.5                # 仅 ce_fuse 用：alpha×归一化RRF + (1-alpha)×sigmoid(CE)
+  rerank_model_path: "models/reranker_bge_base"
+  rerank_batch_size: 8
+  rerank_max_length: 512
+
+units:
+  # ---- 以下键均已接线（消费者：domain/units/converter.py）----
+  default_amount_display: "亿元"
+  source_unit: "万元"
+  display_options: ["亿元", "万元", "元"]
+
+validator:
+  # ---- 前 5 个键消费者：converter.py（domain/units/）----
+  # output_guard.py 已于 2026-09-22 删除 → 下列 3 个键当前无消费者，保留待决
+  max_ratio_value: 10.0
+  max_growth_value: 100.0
+  max_per_share_value: 100000.0
+  min_per_share_value: -1000.0
+  min_answer_length: 10
+  max_answer_length: 3000
+  forbidden_patterns:
+    - "我不知道"
+    - "我猜"
+    - "我觉得"
+    - "I don't know"
+
+session:
+  # ---- 以下键均已接线（消费者：agent/session.py）----
+  ttl_minutes: 30
+  max_history_turns: 20
+  max_sessions: 500
+
+database:
+  host: "localhost"
+  port: 3306
+  database: "finance_data"
+  user: "root"
+  password: "<YOUR_DB_PASSWORD>"
